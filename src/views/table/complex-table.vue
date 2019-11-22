@@ -168,7 +168,7 @@ const calendarTypeKeyValue = calendarTypeOptions.reduce((acc, cur) => {
 export default {
   name: 'ComplexTable',
   components: { Pagination },
-  directives: { waves },
+
   filters: {
     statusFilter(status) {
       const statusMap = {
@@ -292,11 +292,12 @@ export default {
           this.temp.id = parseInt(Math.random() * 100) + 1024 // mock a id
           this.temp.author = 'vue-element-admin'
           createArticle(this.temp).then(() => {
+            console.log(this.temp)
             this.list.unshift(this.temp)
             this.dialogFormVisible = false
             this.$notify({
-              title: 'Success',
-              message: 'Created Successfully',
+              title: '添加完成',
+              message: '成功添加订单，如需修改请在下午4点前修改',
               type: 'success',
               duration: 2000
             })

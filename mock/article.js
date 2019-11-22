@@ -23,7 +23,26 @@ for (let i = 0; i < count; i++) {
     comment_disabled: true,
     pageviews: '@integer(300, 5000)',
     image_uri,
-    platforms: ['a-platform']
+    platforms: ['a-platform'],
+    delivery_time: +Mock.Random.date('T'),
+    // 宣传编号
+    ppg_id: '@increment',
+    // 学校名称
+    school: '@first',
+    // 购买产品
+    buy_product: '@first',
+    // 价格
+    price: 790,
+    // 付款方式 1货到付款 2微信支付
+    pay_method: '1',
+    // 学生及家长姓名
+    parent_name: '@first',
+    son_name: '@first',
+    // 收件地址及电话
+    address: '@first',
+    phone: '@first',
+    // 派送方式
+    delivery: ''
   }))
 }
 

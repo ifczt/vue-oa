@@ -16,7 +16,8 @@ export function isExternal(path) {
  */
 export function validUsername(str) {
   const valid_map = ['admin', 'editor']
-  return valid_map.indexOf(str.trim()) >= 0
+  return str.length >= 2
+  // return valid_map.indexOf(str.trim()) >= 0
 }
 
 /**
@@ -84,4 +85,13 @@ export function isArray(arg) {
     return Object.prototype.toString.call(arg) === '[object Array]'
   }
   return Array.isArray(arg)
+}
+
+/**
+ * @param {string} str
+ * @returns {Boolean}
+ */
+export function isPhone(str) {
+  const reg = /^1[3|4|5|7|8][0-9]\d{8}$/
+  return reg.test(str)
 }
