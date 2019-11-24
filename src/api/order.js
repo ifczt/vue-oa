@@ -12,6 +12,7 @@ export function inputOrder(data) {
   return request({
     url: '/order/input',
     method: 'post',
+    timeout: 0,
     data
   })
 }
@@ -19,14 +20,16 @@ export function inputOrder(data) {
 export function getProductList() {
   return request({
     url: '/order/product_list',
-    method: 'get'
+    method: 'get',
+    timeout: 0
   })
 }
 
 export function getExpressList() {
   return request({
     url: '/order/express_list',
-    method: 'get'
+    method: 'get',
+    timeout: 0
   })
 }
 

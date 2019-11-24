@@ -4,15 +4,44 @@
     <el-table
       v-loading="listLoading"
       :data="list"
-      border
       fit
       highlight-current-row
       style="width: 100%"
       :height="tableHeight"
     >
+      <el-table-column type="expand">
+        <template slot-scope="scope">
+          <el-form label-position="left" inline class="demo-table-expand">
+            <el-form-item label="宣传编号:">
+              <span>{{ scope.row.ppg_id }}</span>
+            </el-form-item>
+            <el-form-item label="所属加盟商:">
+              <span>{{ scope.row.publicist }}</span>
+            </el-form-item>
+            <el-form-item label="学生姓名:">
+              <span>{{ scope.row.student }}</span>
+            </el-form-item>
+            <el-form-item label="售价:">
+              <span>{{ scope.row.price }}</span>
+            </el-form-item>
+            <el-form-item label="地址:">
+              <span>{{ scope.row.address }}</span>
+            </el-form-item>
+            <el-form-item label="申请折扣状态:">
+              <span><el-tag>{{ scope.row.apply_discount_state?"申请中":"未申请" }}</el-tag></span>
+            </el-form-item>
+            <el-form-item label="订单录入员:">
+              <span>{{ scope.row.input_staff }}</span>
+            </el-form-item>
+            <el-form-item label="联系电话:">
+              <span>{{ scope.row.phone }}</span>
+            </el-form-item>
+          </el-form>
+        </template>
+      </el-table-column>
       <el-table-column align="center" label="订单编号" width="80">
         <template slot-scope="scope">
-          <span>{{ scope.row.ppg_id }}</span>
+          <span>{{ scope.row.id }}</span>
         </template>
       </el-table-column>
       <el-table-column min-width="120px" align="center" label="产品名称">
@@ -25,20 +54,14 @@
           <span>{{ scope.row.school }}</span>
         </template>
       </el-table-column>
-      <el-table-column width="120px" align="center" label="所属加盟商">
+      <el-table-column min-width="180px" align="center" label="家长姓名">
         <template slot-scope="scope">
-          <span>待定</span>
-        </template>
-      </el-table-column>
-      <el-table-column min-width="180px" align="center" label="学生与家长">
-        <template slot-scope="scope">
-          <el-tag>{{ scope.row.parent_name }}</el-tag>
-          <el-tag type="success">{{ scope.row.son_name }}</el-tag>
+          <el-tag>{{ scope.row.parent }}</el-tag>
         </template>
       </el-table-column>
       <el-table-column width="100px" align="center" label="物流状态">
         <template slot-scope="scope">
-          <span>待定</span>
+          <span><el-tag :type="scope.row.delivery_state==='未发货'?'info':scope.row.delivery_state==='签收'?'success':'danger'">{{ scope.row.delivery_state }}</el-tag></span>
         </template>
       </el-table-column>
       <el-table-column class-name="status-col" label="售价" width="100">
@@ -46,12 +69,12 @@
           <span>{{ scope.row.price }}</span>
         </template>
       </el-table-column>
-      <el-table-column class-name="status-col" align="center" label="录入与发货" width="110">
+      <el-table-column class-name="status-col" align="center" label="发货时间" width="110">
         <template slot-scope="scope">
           <el-tag>{{ scope.row.delivery_time | parseTime('{y}-{m}-{d}') }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column min-width="100px" align="center" label="物流公司">
+      <el-table-column min-width="100px" align="center" label="派送方式">
         <template slot-scope="scope">
           <span>{{ scope.row.delivery }}</span>
         </template>
@@ -166,7 +189,9 @@
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取消</el-button>
-        <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">提交</el-button>
+        <el-button type="primary" :loading="is_server_input" @click="dialogStatus==='create'?createData():updateData()">
+          提交
+        </el-button>
       </div>
     </el-dialog>
 
@@ -183,18 +208,24 @@
 
 <script>
 import { regionData, CodeToText } from 'element-china-area-data'
-// import {fetchList, fetchPv, createArticle, updateArticle} from "@/api/article";
 import { fetchList, inputOrder, getProductList, getExpressList, getPpg_id_info } from '@/api/order'
 import Pagination from '@/components/Pagination'
 import { parseTime } from '@/utils'
-import { isPhone } from '@/utils/validate'
+import { Loading } from 'element-ui'
+import { mapGetters } from 'vuex'
 
 export default {
   name: 'OrderInput',
   list: [],
   components: { Pagination },
+  loading_options: {
+    lock: true,
+    text: 'Loading',
+    spinner: 'el-icon-loading',
+    background: 'rgba(0, 0, 0, 0.7)'
+  },
   data() {
-    var checkPhone = (rule, value, callback) => {
+    const checkPhone = (rule, value, callback) => {
       if (!value) {
         return callback(new Error('手机号不能为空'))
       } else {
@@ -208,6 +239,7 @@ export default {
       }
     }
     return {
+      is_server_input: false,
       // 中国区域信息
       area: [],
       china_options: regionData,
@@ -250,6 +282,14 @@ export default {
       },
       // 表单数据
       temp: {
+        // 编号
+        id: '',
+        // 加盟商
+        publicist: '',
+        // 订单录入员
+        input_staff: this.name,
+        // 物流状态
+        delivery_state: '',
         // 收件人-谁是
         consignee: '1',
         // 派单时间
@@ -305,12 +345,8 @@ export default {
   created() {
     this.tableHeight = window.innerHeight - 250
     this.getList()
-    getProductList().then(response => {
-      this.product_name_options = response.data
-    })
-    getExpressList().then(response => {
-      this.delivery_mode_options = response.data
-    })
+    this.lite_getProductList()
+    Loading.service(this.loading_options)
   },
   methods: {
     // 获取列表数据
@@ -327,7 +363,12 @@ export default {
     },
     // 重置表单
     resetTemp() {
+      this.is_server_input = false
       this.temp = {
+        id: '',
+        publicist: '',
+        input_staff: this.name,
+        delivery_state: '',
         delivery_time: parseTime(new Date(), '{y}-{m}-{d}'),
         ppg_id: '',
         school: '',
@@ -355,6 +396,9 @@ export default {
     },
     // 新建视图
     handleCreate() {
+      if (!this.delivery_mode_options) {
+
+      }
       this.resetTemp()
       this.dialogStatus = 'create'
       this.dialogFormVisible = true
@@ -364,22 +408,26 @@ export default {
     },
     // 插入数据
     createData() {
+      this.is_server_input = true
       this.$refs['dataForm'].validate(valid => {
         if (valid) {
-          if (this.temp.student == '' || this.temp.parent == '') {
+          if (this.temp.student === '' || this.temp.parent === '') {
             this.$message('家长和学生姓名不能为空')
+            this.is_server_input = false
             return
           }
           var send_temp = JSON.parse(JSON.stringify(this.temp))
           send_temp.apply_discount_state = this.temp.apply_discount_state ? 1 : 0
           send_temp.buy_product = this.temp.buy_product.id
           send_temp.delivery = this.temp.delivery.id
-          inputOrder(send_temp).then(() => {
-            console.log(this.temp)
+          inputOrder(send_temp).then(response => {
             this.temp.buy_product = this.temp.buy_product.name
             this.temp.delivery = this.temp.delivery.name
+            this.temp.id = response.data.id
+            this.temp.delivery_state = response.data.delivery_state
             this.list.unshift(this.temp)
             this.dialogFormVisible = false
+            this.is_server_input = false
             this.$notify({
               title: '新建成功',
               message: '成功录入订单',
@@ -393,17 +441,16 @@ export default {
     // 补全家长或学生姓名
     auto_cname() {
       var temp = this.temp
-      console.log(temp.parent_name)
-      if ((temp.son_name != '') & (temp.parent_name != '')) {
+      if ((temp.student !== '') & (temp.parent !== '')) {
         this.$message({ message: '无需使用该功能' })
         return
       }
-      if ((temp.parent_name != '') & (temp.son_name == '')) {
-        temp.son_name = temp.parent_name + '的孩子'
+      if ((temp.parent !== '') & (temp.student === '')) {
+        temp.student = temp.parent + '的孩子'
         return
       }
-      if ((temp.son_name != '') & (temp.parent_name == '')) {
-        temp.parent_name = temp.son_name + '的家长'
+      if ((temp.student !== '') & (temp.parent === '')) {
+        temp.parent = temp.student + '的家长'
         return
       }
       this.$message({ message: '请填写家长姓名或学生姓名后再使用' })
@@ -422,18 +469,33 @@ export default {
       this.temp.price = item.price
     },
     changeDelivery(item) {
-      if (item.name == '内送') {
-        console.log(this.temp.price)
+      if (item.name === '内送') {
         this.temp.price = 0
-        console.log(this.temp.price)
       }
     },
+    lite_getProductList() {
+      getProductList().then(response => {
+        this.lite_getExpressList()
+        this.product_name_options = response.data
+      }).catch((error) => {
+        this.lite_getProductList()
+      })
+    },
+    lite_getExpressList() {
+      getExpressList().then(response => {
+        Loading.service(this.loading_options).close()
+        this.delivery_mode_options = response.data
+      }).catch((error) => {
+        this.lite_getExpressList()
+      })
+    },
     changePpg_id(val) {
-      // _json = JSON.stringify({ppg_id:val});
       getPpg_id_info({ ppg_id: val }).then(response => {
         this.temp.school = response.data.school
+        this.temp.publicist = response.data.publicist
       }).catch((error) => {
         this.temp.school = null
+        this.temp.publicist = null
       })
     },
     // 更新条目数据
@@ -461,6 +523,9 @@ export default {
         // }
       })
     }
+  },
+  computed: {
+    ...mapGetters(['name'])
   }
 }
 </script>
@@ -468,6 +533,21 @@ export default {
 <style scoped>
   .edit-input {
     padding-right: 100px;
+  }
+
+  .demo-table-expand {
+    font-size: 0;
+  }
+
+  .demo-table-expand label {
+    width: 90px;
+    color: #99a9bf;
+  }
+
+  .demo-table-expand .el-form-item {
+    margin-right: 0;
+    margin-bottom: 0;
+    width: 50%;
   }
 
   .cancel-btn {

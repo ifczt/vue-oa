@@ -100,18 +100,18 @@ export const constantRoutes = [
  * 需要根据用户角色动态加载的路由
  */
 export const asyncRoutes = [
-  {
-    path: '/data_show',
-    component: Layout,
-    children: [
-      {
-        path: '/data_show',
-        component: () => import('@/views/数据SHOW/index'),
-        name: 'data_show',
-        meta: { title: '数据SHOW', icon: 'dashboard', noCache: true }
-      }
-    ]
-  },
+  // {
+  //   path: '/data_show',
+  //   component: Layout,
+  //   children: [
+  //     {
+  //       path: '/data_show',
+  //       component: () => import('@/views/数据SHOW/index'),
+  //       name: 'data_show',
+  //       meta: { title: '数据SHOW', icon: 'dashboard', noCache: true }
+  //     }
+  //   ]
+  // },
   {
     path: '/example',
     component: Layout,

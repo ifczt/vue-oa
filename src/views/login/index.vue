@@ -85,8 +85,8 @@ export default {
     }
     return {
       loginForm: {
-        username: 'admin',
-        password: '111111'
+        username: 'ifczt',
+        password: 'ifczt'
       },
       loginRules: {
         username: [{ required: true, trigger: 'blur', validator: validateUsername }],
@@ -96,7 +96,7 @@ export default {
       capsTooltip: false,
       loading: false,
       showDialog: false,
-      redirect: '/order_input',
+      redirect: undefined,
       otherQuery: {}
     }
   },
@@ -155,7 +155,8 @@ export default {
           this.loading = true
           this.$store.dispatch('user/login', this.loginForm)
             .then(() => {
-              this.$router.push({ path: this.redirect || '/order_input', query: this.otherQuery })
+              console.log(this.redirect)
+              this.$router.push({ path: '/order_input', query: this.otherQuery })
               this.loading = false
             })
             .catch(() => {
