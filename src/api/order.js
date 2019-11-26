@@ -4,7 +4,26 @@ export function fetchList(query) {
   return request({
     url: '/order/list',
     method: 'post',
+    timeout: 0,
     query
+  })
+}
+
+export function update_order(data) {
+  return request({
+    url: '/order/update_list',
+    method: 'post',
+    timeout: 0,
+    data
+  })
+}
+
+export function del_list(data) {
+  return request({
+    url: '/order/del_list',
+    method: 'post',
+    timeout: 0,
+    data
   })
 }
 
@@ -19,7 +38,7 @@ export function inputOrder(data) {
 
 export function getProductList() {
   return request({
-    url: '/order/product_list',
+    url: '/product_list',
     method: 'get',
     timeout: 0
   })
@@ -27,7 +46,7 @@ export function getProductList() {
 
 export function getExpressList() {
   return request({
-    url: '/order/express_list',
+    url: '/express_list',
     method: 'get',
     timeout: 0
   })

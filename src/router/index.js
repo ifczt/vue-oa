@@ -100,18 +100,18 @@ export const constantRoutes = [
  * 需要根据用户角色动态加载的路由
  */
 export const asyncRoutes = [
-  // {
-  //   path: '/data_show',
-  //   component: Layout,
-  //   children: [
-  //     {
-  //       path: '/data_show',
-  //       component: () => import('@/views/数据SHOW/index'),
-  //       name: 'data_show',
-  //       meta: { title: '数据SHOW', icon: 'dashboard', noCache: true }
-  //     }
-  //   ]
-  // },
+  {
+    path: '/data_show',
+    component: Layout,
+    children: [
+      {
+        path: '/data_show',
+        component: () => import('@/views/数据SHOW/index'),
+        name: 'data_show',
+        meta: { title: '数据SHOW', icon: 'dashboard', noCache: true }
+      }
+    ]
+  },
   {
     path: '/example',
     component: Layout,
@@ -122,25 +122,25 @@ export const asyncRoutes = [
       icon: 'clipboard'
     },
     children: [
-      {
-        path: 'create',
-        component: () => import('@/views/example/create'),
-        name: 'CreateArticle',
-        meta: { title: 'Create Article', icon: 'edit' }
-      },
-      {
-        path: 'edit/:id(\\d+)',
-        component: () => import('@/views/example/edit'),
-        name: 'EditArticle',
-        meta: { title: 'Edit Article', noCache: true, activeMenu: '/example/list' },
-        hidden: true
-      },
-      {
-        path: 'list',
-        component: () => import('@/views/example/list'),
-        name: 'ArticleList',
-        meta: { title: 'Article List', icon: 'list' }
-      }
+      // {
+      //   path: 'create',
+      //   component: () => import('@/views/example/create'),
+      //   name: 'CreateArticle',
+      //   meta: { title: 'Create Article', icon: 'edit' }
+      // },
+      // {
+      //   path: 'edit/:id(\\d+)',
+      //   component: () => import('@/views/example/edit'),
+      //   name: 'EditArticle',
+      //   meta: { title: 'Edit Article', noCache: true, activeMenu: '/example/list' },
+      //   hidden: true
+      // },
+      // {
+      //   path: 'list',
+      //   component: () => import('@/views/example/list'),
+      //   name: 'ArticleList',
+      //   meta: { title: 'Article List', icon: 'list' }
+      // }
     ]
   },
 
@@ -150,7 +150,7 @@ export const asyncRoutes = [
     children: [
       {
         path: 'index',
-        component: () => import('@/views/tab/index'),
+        component: () => import('@/views/error-page/404'),
         name: 'Tab',
         meta: { title: '回款与查账', icon: 'tab' }
       }
