@@ -155,6 +155,11 @@ export default {
       fetchList(this.listQuery).then(response => {
         this.list = response.data.items
         this.total = response.data.total
+        for (var obj of this.list) {
+          console.log(obj.apply_discount_state, typeof obj.apply_discount_state)
+          console.log(Boolean(obj.apply_discount_state))
+          obj.apply_discount_state = Boolean(obj.apply_discount_state)
+        }
         this.listLoading = false
       })
     },

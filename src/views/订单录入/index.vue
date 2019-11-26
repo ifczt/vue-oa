@@ -191,7 +191,7 @@
           </el-select>
         </el-form-item>
         <el-form-item v-show="temp.pay_method==1" label="申请折扣">
-          <el-switch :v-model="temp.apply_discount_state=Boolean(temp.apply_discount_state)" />
+          <el-switch v-model="temp.apply_discount_state" />
         </el-form-item>
         <el-form-item v-show="temp.apply_discount_state" label="价格调整">
           <el-input-number v-model="temp.price" :min="0" :max="1290" />
