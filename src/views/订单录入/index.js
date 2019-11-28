@@ -7,7 +7,8 @@ import Pagination from '@/components/Pagination'
 import { parseTime } from '@/utils'
 import { Loading } from 'element-ui'
 import { mapGetters } from 'vuex'
-
+import { get_delivery_name, get_product_name, list_handle, to_server_order } from '@/utils/server_data'
+import _global from '@/utils/Global'
 export default {
   name: 'OrderInput',
   list: [],
@@ -138,7 +139,6 @@ export default {
   // html加载完成之前，执行
   created() {
     this.tableHeight = window.innerHeight - 250
-    this.getList()
     this.lite_getProductList()
     Loading.service(this.loading_options)
   },
@@ -153,13 +153,8 @@ export default {
     getList() {
       this.listLoading = true
       fetchList(this.listQuery).then(response => {
-        this.list = response.data.items
+        this.list = list_handle(response.data.items)
         this.total = response.data.total
-        for (var obj of this.list) {
-          console.log(obj.apply_discount_state, typeof obj.apply_discount_state)
-          console.log(Boolean(obj.apply_discount_state))
-          obj.apply_discount_state = Boolean(obj.apply_discount_state)
-        }
         this.listLoading = false
       })
     },
@@ -216,16 +211,9 @@ export default {
             this.is_server_input = false
             return
           }
-          if (this.temp.pay_method === 2) {
-            this.temp.price = 0
-          }
-          if (!this.temp.apply_discount_state) {
-            this.temp.price = this.temp.buy_product.price
-          }
-          var send_temp = JSON.parse(JSON.stringify(this.temp))
-          send_temp.apply_discount_state = this.temp.apply_discount_state ? 1 : 0
-          send_temp.buy_product = this.temp.buy_product.id
-          send_temp.delivery = this.temp.delivery.id
+          this.temp.price = this.temp.pay_method === 2 ? 0 : this.temp.price
+          this.temp.price = this.temp.apply_discount_state ? this.temp.price : this.temp.buy_product.price
+          const send_temp = to_server_order(JSON.parse(JSON.stringify(this.temp)))
           inputOrder(send_temp).then(response => {
             this.temp.buy_product = this.temp.buy_product.name
             this.temp.delivery = this.temp.delivery.name
@@ -273,22 +261,28 @@ export default {
     changeProduct(item) {
       this.temp.price = item.price
     },
+    // 获取产品列表 加载完成就获取快递列表
     lite_getProductList() {
       getProductList().then(response => {
         this.lite_getExpressList()
+        _global.product_name_options = response.data
         this.product_name_options = response.data
       }).catch((error) => {
         this.lite_getProductList()
       })
     },
+    // 加载快递列表
     lite_getExpressList() {
       getExpressList().then(response => {
         Loading.service(this.loading_options).close()
+        _global.delivery_mode_options = response.data
         this.delivery_mode_options = response.data
+        this.getList()
       }).catch((error) => {
         this.lite_getExpressList()
       })
     },
+
     changePpg_id(val) {
       getPpg_id_info({ ppg_id: val }).then(response => {
         this.temp.school = response.data.school
@@ -302,61 +296,14 @@ export default {
     updateData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          const tempData = Object.assign({}, this.temp)
-          tempData.delivery_time = parseTime(tempData.delivery_time, '{y}-{m}-{d}')
-          if (tempData.buy_product instanceof Object) {
-            tempData.buy_product = tempData.buy_product.id
-            if (!tempData.apply_discount_state) {
-              tempData.price = tempData.buy_product.price
-              this.temp.price = tempData.price
-            }
-          } else {
-            for (var obj of this.product_name_options) {
-              if (obj.name === tempData.buy_product) {
-                tempData.buy_product = obj.id
-                if (!tempData.apply_discount_state) {
-                  tempData.price = obj.price
-                  this.temp.price = tempData.price
-                }
-                break
-              }
-            }
-          }
-          if (tempData.delivery instanceof Object) {
-            tempData.delivery = tempData.delivery.id
-          } else {
-            for (obj of this.delivery_mode_options) {
-              if (obj.name === tempData.delivery) {
-                tempData.delivery = obj.id
-                break
-              }
-            }
-          }
-          console.log(tempData)
+          const tempData = to_server_order(Object.assign({}, this.temp))
+          this.temp.price = tempData.price
           update_order(tempData).then(() => {
             for (const v of this.list) {
               if (v.id === this.temp.id) {
                 const index = this.list.indexOf(v)
-                if (this.temp.buy_product instanceof Object) {
-                  this.temp.buy_product = this.temp.buy_product.name
-                } else {
-                  for (var obj of this.product_name_options) {
-                    if (obj.id === this.temp.buy_product) {
-                      this.temp.buy_product = obj.name
-                      break
-                    }
-                  }
-                }
-                if (this.temp.delivery instanceof Object) {
-                  this.temp.delivery = this.temp.delivery.name
-                } else {
-                  for (obj of this.delivery_mode_options) {
-                    if (obj.id === this.temp.delivery) {
-                      this.temp.delivery = obj.name
-                      break
-                    }
-                  }
-                }
+                this.temp.buy_product = get_product_name(this.temp.buy_product)
+                this.temp.delivery = get_delivery_name(this.temp.delivery)
                 this.list.splice(index, 1, this.temp)
                 break
               }

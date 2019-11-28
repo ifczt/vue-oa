@@ -190,7 +190,7 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item v-show="temp.pay_method==1" label="申请折扣">
+        <el-form-item v-show="temp.pay_method==='1'" label="申请折扣">
           <el-switch v-model="temp.apply_discount_state" />
         </el-form-item>
         <el-form-item v-show="temp.apply_discount_state" label="价格调整">
@@ -210,14 +210,13 @@
       :total="total"
       :page.sync="listQuery.page"
       :limit.sync="listQuery.limit"
-      style="padding: 0px"
-      @pagination="getList"
+      style="padding: 0"
+      @pagination="getList()"
     />
   </div>
 </template>
 
-<script src="./index.js"></script>
-
+<script src="./index.js" type="text/javascript"></script>
 <style>
   .edit-input {
     padding-right: 100px;

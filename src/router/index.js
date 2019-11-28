@@ -75,7 +75,7 @@ export const constantRoutes = [
     children: [
       {
         path: '/order_input',
-        component: () => import('@/views/订单录入/index'),
+        component: () => import('@/views/订单录入/index.vue'),
         name: '订单录入',
         meta: { title: '订单录入', icon: 'edit', affix: true }
       }
