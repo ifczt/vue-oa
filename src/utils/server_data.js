@@ -1,8 +1,6 @@
 import _global from '@/utils/Global'
 import { parseTime } from '@/utils/index'
 
-const that = this
-
 export function list_handle(items) {
   // 遍历items 将数据转换为符合标准的数据
   for (const obj of items) {
@@ -24,7 +22,6 @@ export function get_product_price(buy_product) {
     return buy_product
   } else {
     for (const obj of _global.product_name_options) {
-      console.log(obj, buy_product)
       if (obj.name === buy_product || obj.id === parseInt(buy_product)) {
         return obj.price
       }
@@ -85,7 +82,6 @@ export function to_server_order(items) {
   items.buy_product = get_product_id(items.buy_product)
   items.delivery = get_delivery_id(items.delivery)
   items.delivery_time = parseTime(items.delivery_time, '{y}-{m}-{d}')
-  console.log(items.delivery_state, 'delivery_state')
   items.delivery_state = _global.DELIVERY_STATE.indexOf(items.delivery_state)
   return items
 }
@@ -93,6 +89,7 @@ export function to_server_order(items) {
 export function get_product_id(buy_product) {
   if (buy_product instanceof Object) {
     buy_product = buy_product.id
+    return buy_product
   } else {
     for (const obj of _global.product_name_options) {
       if (obj.name === buy_product) {
@@ -107,6 +104,7 @@ export function get_product_id(buy_product) {
 export function get_delivery_id(delivery) {
   if (delivery instanceof Object) {
     delivery = delivery.id
+    return delivery
   } else {
     for (const obj of _global.delivery_mode_options) {
       if (obj.name === delivery) {
@@ -125,3 +123,4 @@ export function isRealNum(val) {
   }
   return !isNaN(val)
 }
+

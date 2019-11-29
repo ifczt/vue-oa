@@ -15,28 +15,28 @@
         <template slot-scope="scope">
           <el-form label-position="left" inline class="demo-table-expand">
             <el-form-item label="宣传编号:">
-              <span>{{ scope.row.ppg_id }}</span>
+              <span><el-tag type="danger">{{ scope.row.ppg_id }}</el-tag></span>
             </el-form-item>
             <el-form-item label="所属加盟商:">
-              <span>{{ scope.row.publicist }}</span>
+              <span><el-tag>{{ scope.row.publicist }}</el-tag></span>
             </el-form-item>
             <el-form-item label="学生姓名:">
-              <span>{{ scope.row.student }}</span>
+              <span><el-tag type="info">{{ scope.row.student }}</el-tag></span>
             </el-form-item>
-            <el-form-item label="售价:">
-              <span>{{ scope.row.price }}</span>
+            <el-form-item label="付款方式:">
+              <span><el-tag :type="scope.row.pay_method==='1'?'warning':''">{{ scope.row.pay_method==="1"?"货到付款":"线上支付" }}</el-tag></span>
             </el-form-item>
             <el-form-item label="地址:">
-              <span>{{ scope.row.address }}</span>
+              <span><el-tag>{{ scope.row.address }}</el-tag></span>
             </el-form-item>
             <el-form-item label="申请折扣状态:">
               <span><el-tag>{{ scope.row.apply_discount_state?"申请中":"未申请" }}</el-tag></span>
             </el-form-item>
             <el-form-item label="订单录入员:">
-              <span>{{ scope.row.input_staff }}</span>
+              <span><el-tag type="info">{{ scope.row.input_staff }}</el-tag></span>
             </el-form-item>
             <el-form-item label="联系电话:">
-              <span>{{ scope.row.phone }}</span>
+              <span><el-tag type="info">{{ scope.row.phone }}</el-tag></span>
             </el-form-item>
           </el-form>
         </template>
@@ -215,7 +215,6 @@
     />
   </div>
 </template>
-
 <script src="./index.js" type="text/javascript"></script>
 <style>
   .edit-input {

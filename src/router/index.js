@@ -87,7 +87,7 @@ export const constantRoutes = [
     children: [
       {
         path: '/order_manage',
-        component: () => import('@/views/订单管理/index'),
+        component: () => import('@/views/订单管理/index.vue'),
         name: 'Documentation',
         meta: { title: '订单管理', icon: 'nested', affix: true }
       }

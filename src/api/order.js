@@ -1,11 +1,11 @@
 import request from '@/utils/request'
 
-export function fetchList(query) {
+export function fetchList(data) {
   return request({
     url: '/order/list',
     method: 'post',
     timeout: 0,
-    query
+    data
   })
 }
 
