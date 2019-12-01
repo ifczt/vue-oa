@@ -59,3 +59,11 @@ export function getPpg_id_info(data) {
     data
   })
 }
+
+export function apply_discount_state_change(data) {
+  return request({
+    url: '/order/apply_discount_state_change',
+    method: 'post',
+    data
+  })
+}

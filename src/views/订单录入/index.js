@@ -9,67 +9,31 @@ import { Loading } from 'element-ui'
 import { mapGetters } from 'vuex'
 import { get_delivery_name, get_product_name, list_handle, to_server_order } from '@/utils/server_data'
 import _global from '@/utils/Global'
+import {checkPhone,loading_options} from '@/utils/Global'
+import {today,tomorrow,after_tomorrow} from '@/utils/time_change'
 export default {
   name: 'OrderInput',
   list: [],
   components: { Pagination },
-  loading_options: {
-    lock: true,
-    text: 'Loading',
-    spinner: 'el-icon-loading',
-    background: 'rgba(0, 0, 0, 0.7)'
-  },
   data() {
-    const checkPhone = (rule, value, callback) => {
-      if (!value) {
-        return callback(new Error('手机号不能为空'))
-      } else {
-        const reg = /^1[3|4|5|7|8][0-9]\d{8}$/
-        if (reg.test(value)) {
-          callback()
-        } else {
-          return callback(new Error('请输入正确的手机号'))
-        }
-      }
-    }
     return {
+      expands: [],//只展开一行放入当前行id
+      getRowKeys(row) {
+        return row.id
+      },
       is_del_server: false,
       is_server_input: false,
       // 中国区域信息
       area: [],
       china_options: regionData,
       // 快速选择派单日期
-      picker_date: {
-        shortcuts: [{
-          text: '今天',
-          onClick(picker) {
-            picker.$emit('pick', new Date())
-          }
-        },
-        {
-          text: '明天',
-          onClick(picker) {
-            const date = new Date()
-            date.setTime(date.getTime() + 3600 * 1000 * 24)
-            picker.$emit('pick', date)
-          }
-        },
-        {
-          text: '后天',
-          onClick(picker) {
-            const date = new Date()
-            date.setTime(date.getTime() + 3600 * 1000 * 24 * 2)
-            picker.$emit('pick', date)
-          }
-        }
-        ]
-      },
+      picker_date: { shortcuts: [today,tomorrow,after_tomorrow] },
       // 列表
       list: [],
       // 列表总条目数
       total: 0,
       // 列表加载动画
-      listLoading: true,
+      listLoading: false,
       // 跳转页数据- page当前页 limit一页多少条数据
       listQuery: {
         page: 1,
@@ -140,9 +104,21 @@ export default {
   created() {
     this.tableHeight = window.innerHeight - 250
     this.lite_getProductList()
-    Loading.service(this.loading_options)
+    Loading.service(loading_options)
   },
   methods: {
+    expandChange(row, expandedRows) {
+      let that = this
+      //只展开一行
+      if (expandedRows.length) {//说明展开了
+        that.expands = []
+        if (row) {
+          that.expands.push(row.id)//只展开当前行id
+        }
+      } else {//说明收起了
+        that.expands = []
+      }
+    },
     tableRowClassName({ row, rowIndex }) {
       if (row.price === 0 && row.pay_method !== '2') {
         return 'warning-row'
@@ -274,7 +250,7 @@ export default {
     // 加载快递列表
     lite_getExpressList() {
       getExpressList().then(response => {
-        Loading.service(this.loading_options).close()
+        Loading.service(loading_options).close()
         _global.delivery_mode_options = response.data
         this.delivery_mode_options = response.data
         this.getList()

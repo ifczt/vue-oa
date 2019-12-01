@@ -1,41 +1,33 @@
 import { CodeToText, regionDataPlus } from 'element-china-area-data'
 import {
   fetchList, inputOrder, getProductList, getExpressList,
-  getPpg_id_info, del_list, update_order
+  getPpg_id_info, del_list, update_order, apply_discount_state_change
 } from '@/api/order'
 import Pagination from '@/components/Pagination'
 import { parseTime } from '@/utils'
 import { Loading } from 'element-ui'
 import { mapGetters } from 'vuex'
-import { get_delivery_name, get_product_name, list_handle, to_server_order } from '@/utils/server_data'
+import { get_delivery_name, get_product, get_product_name, list_handle, to_server_order } from '@/utils/server_data'
 import _global from '@/utils/Global'
-import waves from '@/directive/waves'
+import { checkPhone, loading_options } from '@/utils/Global'
+import { today, tomorrow, after_tomorrow, t_month, t_year, six_month } from '@/utils/time_change'
 
 export default {
   name: 'OrderManage',
   list: [],
   components: { Pagination },
-  loading_options: {
-    lock: true,
-    text: 'Loading',
-    spinner: 'el-icon-loading',
-    background: 'rgba(0, 0, 0, 0.7)'
-  },
   data() {
-    const checkPhone = (rule, value, callback) => {
-      if (!value) {
-        return callback(new Error('手机号不能为空'))
-      } else {
-        const reg = /^1[3|4|5|7|8][0-9]\d{8}$/
-        if (reg.test(value)) {
-          callback()
-        } else {
-          return callback(new Error('请输入正确的手机号'))
-        }
-      }
-    }
     return {
-      approval_ico: 'el-icon-check',
+      apply_discount_text(bool){
+        return bool?'同意折扣申请':'拒绝折扣申请'
+      },
+      expands: [],//只展开一行放入当前行id
+      getRowKeys(row) {
+        return row.id
+      },
+      approval_ico(bool) {
+        return bool ? 'el-icon-check' : 'el-icon-minus'
+      },
       drawer: false,
       direction: 'ttb',
       is_del_server: false,
@@ -45,62 +37,18 @@ export default {
       china_options: regionDataPlus,
       // 快速选择派单日期
       picker_date: {
-        shortcuts: [{
-          text: '今天',
-          onClick(picker) {
-            picker.$emit('pick', new Date())
-          }
-        },
-        {
-          text: '明天',
-          onClick(picker) {
-            const date = new Date()
-            date.setTime(date.getTime() + 3600 * 1000 * 24)
-            picker.$emit('pick', date)
-          }
-        },
-        {
-          text: '后天',
-          onClick(picker) {
-            const date = new Date()
-            date.setTime(date.getTime() + 3600 * 1000 * 24 * 2)
-            picker.$emit('pick', date)
-          }
-        }
-        ]
+        shortcuts: [today, tomorrow, after_tomorrow]
       },
       // 快速选择时间段
       picker_time_slot: {
-        shortcuts: [{
-          text: '本月',
-          onClick(picker) {
-            const end = new Date()
-            const start = new Date(new Date().getFullYear(), new Date().getMonth(), 1)
-            picker.$emit('pick', [start, end])
-          }
-        }, {
-          text: '今年至今',
-          onClick(picker) {
-            const end = new Date()
-            const start = new Date(new Date().getFullYear(), 0)
-            picker.$emit('pick', [start, end])
-          }
-        }, {
-          text: '最近六个月',
-          onClick(picker) {
-            const end = new Date()
-            const start = new Date()
-            start.setMonth(start.getMonth() - 6)
-            picker.$emit('pick', [start, end])
-          }
-        }]
+        shortcuts: [t_month, t_year, six_month]
       },
       // 列表
       list: [],
       // 列表总条目数
       total: 0,
       // 列表加载动画
-      listLoading: true,
+      listLoading: false,
       // 跳转页数据- page当前页 limit一页多少条数据
       listQuery: {
         page: 1,
@@ -184,21 +132,39 @@ export default {
   created() {
     this.tableHeight = window.innerHeight - 250
     this.lite_getProductList()
-    Loading.service(this.loading_options)
+    Loading.service(loading_options)
   },
   methods: {
+    expandChange(row, expandedRows) {
+      let that = this
+      //只展开一行
+      if (expandedRows.length) {//说明展开了
+        that.expands = []
+        if (row) {
+          that.expands.push(row.id)//只展开当前行id
+        }
+      } else {//说明收起了
+        that.expands = []
+      }
+    },
     search_cri() {
       this.listQuery.page = 1
       if (this.listQuery.area || this.listQuery.buy_product.length || this.listQuery.courier_code || this.listQuery.delivery.length ||
         this.listQuery.delivery_state.length || this.listQuery.input_staff || this.listQuery.time_slot_value || this.listQuery.type_time_slot ||
         this.listQuery.parent || this.listQuery.phone) {
         this.getList()
+        this.handleClose()
       } else {
         this.$message('必须输入至少一项条件才可以搜索。')
       }
-    },
+    }
+    ,
     handleClose(done) {
-      done()
+      if (done) {
+        done()
+      } else {
+        this.drawer = false
+      }
       this.listQuery = {
         page: 1,
         limit: 20,
@@ -214,13 +180,15 @@ export default {
         phone: '',
         parent: ''
       }
-    },
+    }
+    ,
     tableRowClassName({ row, rowIndex }) {
       if (row.price === 0 && row.pay_method !== '2') {
         return 'warning-row'
       }
       return ''
-    },
+    }
+    ,
     // 获取列表数据
     getList() {
       this.listLoading = true
@@ -229,7 +197,8 @@ export default {
         this.total = response.data.total
         this.listLoading = false
       })
-    },
+    }
+    ,
     // 重置表单
     resetTemp() {
       this.is_server_input = false
@@ -253,7 +222,8 @@ export default {
         consignee: '1',
         apply_discount_state: false
       }
-    },
+    }
+    ,
     // 区域选中
     area_select(value) {
       let area_value = ''
@@ -263,7 +233,8 @@ export default {
         area_value += CodeToText[value[i]]
       }
       this.temp.address = area_value
-    },
+    }
+    ,
     // 新建视图
     handleCreate() {
       this.resetTemp()
@@ -272,7 +243,8 @@ export default {
       this.$nextTick(() => {
         this.$refs['dataForm'].clearValidate()
       })
-    },
+    }
+    ,
     // 插入数据
     createData() {
       this.is_server_input = true
@@ -303,7 +275,8 @@ export default {
           })
         }
       })
-    },
+    }
+    ,
     // 补全家长或学生姓名
     auto_cname() {
       var temp = this.temp
@@ -320,7 +293,8 @@ export default {
         return
       }
       this.$message({ message: '请填写家长姓名或学生姓名后再使用' })
-    },
+    }
+    ,
     // 更新数据视图弹出
     handleUpdate(row) {
       this.temp = Object.assign({}, row) // copy obj
@@ -346,14 +320,15 @@ export default {
     // 加载快递列表
     lite_getExpressList() {
       getExpressList().then(response => {
-        Loading.service(this.loading_options).close()
+        Loading.service(loading_options).close()
         _global.delivery_mode_options = response.data
         this.delivery_mode_options = response.data
         this.getList()
       }).catch((error) => {
         this.lite_getExpressList()
       })
-    },
+    }
+    ,
 
     changePpg_id(val) {
       getPpg_id_info({ ppg_id: val }).then(response => {
@@ -363,7 +338,8 @@ export default {
         this.temp.school = null
         this.temp.publicist = null
       })
-    },
+    }
+    ,
     // 更新条目数据
     updateData() {
       this.$refs['dataForm'].validate((valid) => {
@@ -388,6 +364,23 @@ export default {
               duration: 2000
             })
           })
+        }
+      })
+    }
+    ,
+    change_apply(id,bool){
+
+      apply_discount_state_change({id:id,apply_discount_state:!bool}).then(()=>{
+        for (const v of this.list) {
+          if (v.id === id) {
+            const index = this.list.indexOf(v)
+            v.apply_discount_state = !bool
+            if(bool){
+              v.price = get_product(v.buy_product,'price')
+            }else{
+            }
+            break
+          }
         }
       })
     },

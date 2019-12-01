@@ -76,30 +76,42 @@ export function to_server_order(items) {
   } else {
     delete items.area
   }
-  console.log(items.price, items.apply_discount_state, items.buy_product)
   items.price = items.apply_discount_state ? items.price : get_product_price(items.buy_product)
   items.apply_discount_state = items.apply_discount_state ? 1 : 0
-  items.buy_product = get_product_id(items.buy_product)
+  items.buy_product = get_product(items.buy_product,'id')
   items.delivery = get_delivery_id(items.delivery)
   items.delivery_time = parseTime(items.delivery_time, '{y}-{m}-{d}')
   items.delivery_state = _global.DELIVERY_STATE.indexOf(items.delivery_state)
   return items
 }
 
-export function get_product_id(buy_product) {
+export function get_product(buy_product,val) {
   if (buy_product instanceof Object) {
-    buy_product = buy_product.id
+    buy_product = buy_product[val]
     return buy_product
   } else {
     for (const obj of _global.product_name_options) {
       if (obj.name === buy_product) {
-        buy_product = obj.id
+        buy_product = obj[val]
         return buy_product
       }
     }
   }
-  return 0
 }
+// export function get_product_id(buy_product) {
+//   if (buy_product instanceof Object) {
+//     buy_product = buy_product.id
+//     return buy_product
+//   } else {
+//     for (const obj of _global.product_name_options) {
+//       if (obj.name === buy_product) {
+//         buy_product = obj.id
+//         return buy_product
+//       }
+//     }
+//   }
+//   return 0
+// }
 
 export function get_delivery_id(delivery) {
   if (delivery instanceof Object) {

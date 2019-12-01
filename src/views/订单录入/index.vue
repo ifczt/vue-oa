@@ -9,7 +9,7 @@
       highlight-current-row
       style="width: 100%"
       :height="tableHeight"
-      :row-class-name="tableRowClassName"
+      :row-class-name="tableRowClassName" @expand-change="expandChange" :expand-row-keys="expands" :row-key='getRowKeys'
     >
       <el-table-column type="expand">
         <template slot-scope="scope">

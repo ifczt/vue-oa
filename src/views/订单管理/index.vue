@@ -140,7 +140,7 @@
       highlight-current-row
       style="width: 100%"
       :height="tableHeight"
-      :row-class-name="tableRowClassName"
+      :row-class-name="tableRowClassName" @expand-change="expandChange" :expand-row-keys="expands" :row-key='getRowKeys'
     >
       <el-table-column type="expand">
         <template slot-scope="scope">
@@ -221,8 +221,10 @@
       <el-table-column align="center" label="操作" min-width="190">
         <template slot-scope="scope">
           <el-button-group>
-            <el-tooltip class="item" effect="dark" content="同意折扣申请" placement="top-start">
-              <el-button type="primary" :icon="approval_ico" disabled />
+            <el-tooltip class="item" effect="dark" :content="apply_discount_text(scope.row.apply_discount_state)" placement="top-start">
+              <el-button type="primary" :icon="approval_ico(scope.row.apply_discount_state)"
+                         :disabled="approval_dis(scope.row.apply_discount_state,scope.row.buy_product,scope.row.price)"
+              @click="change_apply(scope.row.id,scope.row.apply_discount_state)"/>
             </el-tooltip>
             <el-tooltip class="item" effect="dark" content="编辑用户" placement="top-start">
               <el-button type="primary" icon="el-icon-edit" @click="handleUpdate(scope.row)" />
