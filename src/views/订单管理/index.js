@@ -18,15 +18,15 @@ export default {
   components: { Pagination },
   data() {
     return {
-      apply_discount_text(bool){
-        return bool?'同意折扣申请':'拒绝折扣申请'
+      apply_discount_text(bool) {
+        return bool ? '拒绝折扣申请' : '同意折扣申请'
       },
-      expands: [],//只展开一行放入当前行id
+      expands: [], // 只展开一行放入当前行id
       getRowKeys(row) {
         return row.id
       },
       approval_ico(bool) {
-        return bool ? 'el-icon-check' : 'el-icon-minus'
+        return bool ? 'el-icon-close' : 'el-icon-check'
       },
       drawer: false,
       direction: 'ttb',
@@ -69,6 +69,7 @@ export default {
       },
       // 表单数据
       temp: {
+        auxiliary_apply: false,
         // 编号
         id: '',
         // 加盟商
@@ -136,14 +137,14 @@ export default {
   },
   methods: {
     expandChange(row, expandedRows) {
-      let that = this
-      //只展开一行
-      if (expandedRows.length) {//说明展开了
+      const that = this
+      // 只展开一行
+      if (expandedRows.length) { // 说明展开了
         that.expands = []
         if (row) {
-          that.expands.push(row.id)//只展开当前行id
+          that.expands.push(row.id)// 只展开当前行id
         }
-      } else {//说明收起了
+      } else { // 说明收起了
         that.expands = []
       }
     },
@@ -157,8 +158,7 @@ export default {
       } else {
         this.$message('必须输入至少一项条件才可以搜索。')
       }
-    }
-    ,
+    },
     handleClose(done) {
       if (done) {
         done()
@@ -180,15 +180,13 @@ export default {
         phone: '',
         parent: ''
       }
-    }
-    ,
+    },
     tableRowClassName({ row, rowIndex }) {
       if (row.price === 0 && row.pay_method !== '2') {
         return 'warning-row'
       }
       return ''
-    }
-    ,
+    },
     // 获取列表数据
     getList() {
       this.listLoading = true
@@ -197,8 +195,7 @@ export default {
         this.total = response.data.total
         this.listLoading = false
       })
-    }
-    ,
+    },
     // 重置表单
     resetTemp() {
       this.is_server_input = false
@@ -220,10 +217,10 @@ export default {
         delivery: '',
         area: [],
         consignee: '1',
-        apply_discount_state: false
+        apply_discount_state: false,
+        auxiliary_apply: false
       }
-    }
-    ,
+    },
     // 区域选中
     area_select(value) {
       let area_value = ''
@@ -233,8 +230,7 @@ export default {
         area_value += CodeToText[value[i]]
       }
       this.temp.address = area_value
-    }
-    ,
+    },
     // 新建视图
     handleCreate() {
       this.resetTemp()
@@ -243,8 +239,7 @@ export default {
       this.$nextTick(() => {
         this.$refs['dataForm'].clearValidate()
       })
-    }
-    ,
+    },
     // 插入数据
     createData() {
       this.is_server_input = true
@@ -275,8 +270,7 @@ export default {
           })
         }
       })
-    }
-    ,
+    },
     // 补全家长或学生姓名
     auto_cname() {
       var temp = this.temp
@@ -293,8 +287,7 @@ export default {
         return
       }
       this.$message({ message: '请填写家长姓名或学生姓名后再使用' })
-    }
-    ,
+    },
     // 更新数据视图弹出
     handleUpdate(row) {
       this.temp = Object.assign({}, row) // copy obj
@@ -327,8 +320,7 @@ export default {
       }).catch((error) => {
         this.lite_getExpressList()
       })
-    }
-    ,
+    },
 
     changePpg_id(val) {
       getPpg_id_info({ ppg_id: val }).then(response => {
@@ -338,8 +330,7 @@ export default {
         this.temp.school = null
         this.temp.publicist = null
       })
-    }
-    ,
+    },
     // 更新条目数据
     updateData() {
       this.$refs['dataForm'].validate((valid) => {
@@ -366,22 +357,23 @@ export default {
           })
         }
       })
-    }
-    ,
-    change_apply(id,bool){
-
-      apply_discount_state_change({id:id,apply_discount_state:!bool}).then(()=>{
-        for (const v of this.list) {
-          if (v.id === id) {
-            const index = this.list.indexOf(v)
-            v.apply_discount_state = !bool
-            if(bool){
-              v.price = get_product(v.buy_product,'price')
-            }else{
-            }
-            break
+    },
+    change_apply(id, bool) {
+      bool = !bool
+      let v
+      for (v of this.list) {
+        if (v.id === id) {
+          const index = this.list.indexOf(v)
+          v.auxiliary_apply = bool
+          if (!v.auxiliary_apply) {
+            v.apply_discount_state = false
+            v.price = get_product(v.buy_product, 'price')
           }
+          break
         }
+      }
+      apply_discount_state_change({ id: id, apply_discount_state: bool ? 2 : 0, price: v.price }).then(() => {
+
       })
     },
     // 删除条目

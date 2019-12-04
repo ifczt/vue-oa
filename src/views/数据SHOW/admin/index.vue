@@ -1,12 +1,9 @@
 <template>
   <div class="dashboard-editor-container" :style="{'height': body_height}">
-
     <panel-group />
-
     <el-row style="background:#fff;padding:16px 16px 0;margin-bottom:32px;">
       <line-chart :chart-data="sale_chart_data" :options="sale_chart_data_options" />
     </el-row>
-
     <el-row v-show="false" :gutter="32">
       <el-col :xs="24" :sm="24" :lg="24">
         <div class="chart-wrapper">
@@ -14,7 +11,6 @@
         </div>
       </el-col>
     </el-row>
-
   </div>
 </template>
 
@@ -36,7 +32,7 @@ const sale_chart_data = {
 }
 
 export default {
-  name: 'DashboardAdmin',
+  name: 'DatashowAdmin',
   components: {
     GithubCorner,
     PanelGroup,

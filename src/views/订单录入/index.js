@@ -9,15 +9,16 @@ import { Loading } from 'element-ui'
 import { mapGetters } from 'vuex'
 import { get_delivery_name, get_product_name, list_handle, to_server_order } from '@/utils/server_data'
 import _global from '@/utils/Global'
-import {checkPhone,loading_options} from '@/utils/Global'
-import {today,tomorrow,after_tomorrow} from '@/utils/time_change'
+import { checkPhone, loading_options } from '@/utils/Global'
+import { today, tomorrow, after_tomorrow } from '@/utils/time_change'
+
 export default {
   name: 'OrderInput',
   list: [],
   components: { Pagination },
   data() {
     return {
-      expands: [],//只展开一行放入当前行id
+      expands: [], // 只展开一行放入当前行id
       getRowKeys(row) {
         return row.id
       },
@@ -27,7 +28,7 @@ export default {
       area: [],
       china_options: regionData,
       // 快速选择派单日期
-      picker_date: { shortcuts: [today,tomorrow,after_tomorrow] },
+      picker_date: { shortcuts: [today, tomorrow, after_tomorrow] },
       // 列表
       list: [],
       // 列表总条目数
@@ -108,14 +109,14 @@ export default {
   },
   methods: {
     expandChange(row, expandedRows) {
-      let that = this
-      //只展开一行
-      if (expandedRows.length) {//说明展开了
+      const that = this
+      // 只展开一行
+      if (expandedRows.length) { // 说明展开了
         that.expands = []
         if (row) {
-          that.expands.push(row.id)//只展开当前行id
+          that.expands.push(row.id)// 只展开当前行id
         }
-      } else {//说明收起了
+      } else { // 说明收起了
         that.expands = []
       }
     },
@@ -187,9 +188,8 @@ export default {
             this.is_server_input = false
             return
           }
-          this.temp.price = this.temp.pay_method === 2 ? 0 : this.temp.price
-          this.temp.price = this.temp.apply_discount_state ? this.temp.price : this.temp.buy_product.price
           const send_temp = to_server_order(JSON.parse(JSON.stringify(this.temp)))
+          this.temp.price = send_temp.price
           inputOrder(send_temp).then(response => {
             this.temp.buy_product = this.temp.buy_product.name
             this.temp.delivery = this.temp.delivery.name
@@ -207,6 +207,9 @@ export default {
           })
         }
       })
+    },
+    test() {
+      console.log(123123)
     },
     // 补全家长或学生姓名
     auto_cname() {

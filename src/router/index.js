@@ -113,34 +113,15 @@ export const asyncRoutes = [
     ]
   },
   {
-    path: '/example',
+    path: '/school_ext',
     component: Layout,
-    redirect: '/example/list',
-    name: 'Example',
-    meta: {
-      title: '学校推广',
-      icon: 'clipboard'
-    },
     children: [
-      // {
-      //   path: 'create',
-      //   component: () => import('@/views/example/create'),
-      //   name: 'CreateArticle',
-      //   meta: { title: 'Create Article', icon: 'edit' }
-      // },
-      // {
-      //   path: 'edit/:id(\\d+)',
-      //   component: () => import('@/views/example/edit'),
-      //   name: 'EditArticle',
-      //   meta: { title: 'Edit Article', noCache: true, activeMenu: '/example/list' },
-      //   hidden: true
-      // },
-      // {
-      //   path: 'list',
-      //   component: () => import('@/views/example/list'),
-      //   name: 'ArticleList',
-      //   meta: { title: 'Article List', icon: 'list' }
-      // }
+      {
+        path: '/school_ext',
+        component: () => import('@/views/学校推广/index.vue'),
+        name: '学校推广',
+        meta: { title: '学校推广', icon: 'education', affix: true }
+      }
     ]
   },
 

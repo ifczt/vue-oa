@@ -9,7 +9,10 @@
       highlight-current-row
       style="width: 100%"
       :height="tableHeight"
-      :row-class-name="tableRowClassName" @expand-change="expandChange" :expand-row-keys="expands" :row-key='getRowKeys'
+      :row-class-name="tableRowClassName"
+      :expand-row-keys="expands"
+      :row-key="getRowKeys"
+      @expand-change="expandChange"
     >
       <el-table-column type="expand">
         <template slot-scope="scope">
@@ -93,16 +96,22 @@
             @click="handleUpdate(scope.row)"
           >编辑
           </el-button>
-          <el-button
-            type="danger"
-            size="mini"
-            icon="el-icon-edit"
-            style="margin-bottom:0"
-            :loading="is_del_server"
-            @click="del_list(scope.$index,scope.row.id)"
+          <el-popconfirm
+            title="这是一段内容确定删除吗？"
+            @onConfirm="del_list(scope.$index,scope.row.id)"
           >
-            删除
-          </el-button>
+            <el-button
+              slot="reference"
+              type="danger"
+              size="mini"
+              icon="el-icon-edit"
+              style="margin-bottom:0"
+              :loading="is_del_server"
+            >
+              删除
+            </el-button>
+          </el-popconfirm>
+
         </template>
       </el-table-column>
     </el-table>

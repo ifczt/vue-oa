@@ -120,7 +120,7 @@ import Pagination from '@/components/Pagination'
 import { parseTime } from '@/utils'
 
 export default {
-  name: 'OrderEntry',
+  name: 'AccManage',
   list: null,
   components: { Pagination },
   data() {

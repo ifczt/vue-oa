@@ -140,7 +140,10 @@
       highlight-current-row
       style="width: 100%"
       :height="tableHeight"
-      :row-class-name="tableRowClassName" @expand-change="expandChange" :expand-row-keys="expands" :row-key='getRowKeys'
+      :row-class-name="tableRowClassName"
+      :expand-row-keys="expands"
+      :row-key="getRowKeys"
+      @expand-change="expandChange"
     >
       <el-table-column type="expand">
         <template slot-scope="scope">
@@ -220,19 +223,26 @@
       </el-table-column>
       <el-table-column align="center" label="操作" min-width="190">
         <template slot-scope="scope">
-          <el-button-group>
-            <el-tooltip class="item" effect="dark" :content="apply_discount_text(scope.row.apply_discount_state)" placement="top-start">
-              <el-button type="primary" :icon="approval_ico(scope.row.apply_discount_state)"
-                         :disabled="approval_dis(scope.row.apply_discount_state,scope.row.buy_product,scope.row.price)"
-              @click="change_apply(scope.row.id,scope.row.apply_discount_state)"/>
-            </el-tooltip>
-            <el-tooltip class="item" effect="dark" content="编辑用户" placement="top-start">
-              <el-button type="primary" icon="el-icon-edit" @click="handleUpdate(scope.row)" />
-            </el-tooltip>
-            <el-tooltip class="item" effect="dark" content="删除订单" placement="top-start">
-              <el-button type="primary" icon="el-icon-delete" @click="del_list(scope.$index,scope.row.id)" />
-            </el-tooltip>
-          </el-button-group>
+          <el-tooltip
+            v-if="scope.row.apply_discount_state"
+            class="item"
+            effect="dark"
+            :content="apply_discount_text(scope.row.auxiliary_apply)"
+            placement="top-start"
+          >
+            <el-button
+              type="primary"
+              :icon="approval_ico(scope.row.auxiliary_apply)"
+              @click="change_apply(scope.row.id,scope.row.auxiliary_apply)"
+            />
+          </el-tooltip>
+          <el-button type="primary" style="margin-left: 0" icon="el-icon-edit" @click="handleUpdate(scope.row)" />
+          <el-popconfirm
+            title="这是一段内容确定删除吗？"
+            @onConfirm="del_list(scope.$index,scope.row.id)"
+          >
+            <el-button slot="reference" type="primary" icon="el-icon-delete" />
+          </el-popconfirm>
         </template>
       </el-table-column>
     </el-table>
@@ -373,6 +383,7 @@
     margin-bottom: 0;
     width: 50%;
   }
+
   .cancel-btn {
     position: absolute;
     right: 15px;

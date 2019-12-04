@@ -4,6 +4,9 @@ import { parseTime } from '@/utils/index'
 export function list_handle(items) {
   // 遍历items 将数据转换为符合标准的数据
   for (const obj of items) {
+    if (obj.apply_discount_state > 0) {
+      obj.auxiliary_apply = obj.apply_discount_state !== 1
+    }
     obj.apply_discount_state = Boolean(obj.apply_discount_state)
     const delivery_state = obj.delivery_state
     if (typeof delivery_state === 'number') {
@@ -68,6 +71,9 @@ export function get_delivery_name(delivery) {
 
 // 以下是提交到服务器的数据格式化处理
 export function to_server_order(items) {
+  if (items['auxiliary_apply']) {
+    delete items['auxiliary_apply']
+  }
   // 区域合并处理
   if (items.area) {
     items.province = items.area[0]
@@ -77,15 +83,17 @@ export function to_server_order(items) {
     delete items.area
   }
   items.price = items.apply_discount_state ? items.price : get_product_price(items.buy_product)
+  items.price = items.pay_method === '2' ? 0 : items.price
+  console.log(items.pay_method === '2', items.pay_method, 'ifczt')
   items.apply_discount_state = items.apply_discount_state ? 1 : 0
-  items.buy_product = get_product(items.buy_product,'id')
+  items.buy_product = get_product(items.buy_product, 'id')
   items.delivery = get_delivery_id(items.delivery)
   items.delivery_time = parseTime(items.delivery_time, '{y}-{m}-{d}')
   items.delivery_state = _global.DELIVERY_STATE.indexOf(items.delivery_state)
   return items
 }
 
-export function get_product(buy_product,val) {
+export function get_product(buy_product, val) {
   if (buy_product instanceof Object) {
     buy_product = buy_product[val]
     return buy_product
