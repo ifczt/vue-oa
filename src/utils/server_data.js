@@ -106,20 +106,6 @@ export function get_product(buy_product, val) {
     }
   }
 }
-// export function get_product_id(buy_product) {
-//   if (buy_product instanceof Object) {
-//     buy_product = buy_product.id
-//     return buy_product
-//   } else {
-//     for (const obj of _global.product_name_options) {
-//       if (obj.name === buy_product) {
-//         buy_product = obj.id
-//         return buy_product
-//       }
-//     }
-//   }
-//   return 0
-// }
 
 export function get_delivery_id(delivery) {
   if (delivery instanceof Object) {
@@ -144,3 +130,8 @@ export function isRealNum(val) {
   return !isNaN(val)
 }
 
+export function to_server_region_school(val) {
+  val.province = val.province.id
+  val.city = val.city.id
+  return val
+}

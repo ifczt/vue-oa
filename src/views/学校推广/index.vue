@@ -14,7 +14,7 @@
         </div>
       </el-col>
       <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
-        <div class="card-panel">
+        <div class="card-panel" @click="show_school">
           <div class="card-panel-icon-wrapper icon-message">
             <svg-icon icon-class="documentation" class-name="card-panel-icon" />
           </div>
@@ -36,6 +36,51 @@
       </el-tabs>
     </div>
     <el-dialog title="新增学校宣传" :visible.sync="dialogFormVisible">
+      <el-dialog
+        width="30%"
+        title="修改学校信息"
+        :visible.sync="innerVisible"
+        append-to-body
+      >
+        <el-form :model="school_edit_form">
+          <el-form-item label="学校名称" label-width="120px">
+            <el-input v-model="school_edit_form.school_name" placeholder="请输入内容" />
+          </el-form-item>
+          <el-form-item label="学校地址" label-width="120px">
+            <el-input v-model="school_edit_form.school_address" placeholder="请输入内容" />
+          </el-form-item>
+          <el-form-item label="所属区域" label-width="120px">
+            <el-cascader
+              v-model="school_edit_form.area"
+              size="large"
+              :options="china_options"
+              placeholder="指定区域"
+              @change="area_select"
+            />
+          </el-form-item>
+          <el-form-item label="学校质量" label-width="120px">
+            <el-select v-model="school_edit_form.quality" placeholder="学校质量" clearable class="filter-item">
+              <el-option value="顶尖" />
+              <el-option value="优良" />
+              <el-option value="良好" />
+              <el-option value="一般" />
+              <el-option value="差" />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="联系方式" label-width="120px">
+            <el-input
+              v-model="school_edit_form.contact_info"
+              type="textarea"
+              :rows="2"
+              placeholder="请输入内容"
+            />
+          </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="innerVisible = false">取 消</el-button>
+          <el-button type="primary" @click="school_edit">确 定</el-button>
+        </div>
+      </el-dialog>
       <el-form :model="school_form">
         <el-form-item label="学校名称" label-width="120px">
           <el-autocomplete
@@ -58,11 +103,95 @@
           <el-input-number v-model="school_form.sales_nums" :min="0" label="描述文字" />
         </el-form-item>
       </el-form>
+      <el-card v-show="school_tip_show" shadow="never">
+        <span><el-tag>所属区域：{{ school_tip_region }}</el-tag></span>
+        <span><el-tag>地址：{{ school_tip_address }}</el-tag></span>
+        <span><el-tag>质量：{{ school_tip_quality }}</el-tag></span>
+        <el-tooltip content="点击修改信息" placement="top">
+          <el-button type="primary" icon="el-icon-edit" style="float: right" @click="innerVisible=true" />
+        </el-tooltip>
+      </el-card>
+      <div v-show="school_tip_show" style="width: 100%;text-align: center">
+        <span style="color: rgba(5,0,6,0.42)">如信息有误，请点击右侧按钮修改，大谋良好的市场生态需要你我共同努力，十分感谢。</span>
+      </div>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取 消</el-button>
         <el-button type="primary" @click="input_school_ext">确 定</el-button>
       </div>
     </el-dialog>
+    <el-drawer
+      title="学校查看"
+      :visible.sync="drawer"
+      size="60%"
+      align="center"
+    >
+      <el-row>
+        <el-select v-model="listQuery.province" placeholder="省" clearable class="filter-item" style="width: 100px" value-key="id" @change="change_options">
+          <el-option v-for="item in province_options" :id="item.id" :label="item.name" :value="item" />
+        </el-select>
+        <el-select v-model="listQuery.city" placeholder="市" clearable class="filter-item" style="width: 100px" value-key="id">
+          <el-option v-for="item in city_options" :id="item.id" :label="item.name" :value="item" />
+        </el-select>
+        <el-select v-model="listQuery.quality" placeholder="学校质量" clearable class="filter-item" style="width: 100px">
+          <el-option value="顶尖" />
+          <el-option value="优良" />
+          <el-option value="良好" />
+          <el-option value="一般" />
+          <el-option value="差" />
+        </el-select>
+      </el-row>
+      <el-row>
+        <el-input
+          v-model="listQuery.school_name"
+          placeholder="学校名字"
+          style="width: 248px;margin-top: 9px;"
+          class="filter-item"
+        />
+        <el-button
+          class="filter-item"
+          style="margin-top: 10px;"
+          type="success"
+          icon="el-icon-search"
+          @click="get_school_list"
+        />
+      </el-row>
+      <el-table
+        v-loading="school_table_loading"
+        :data="school_list"
+        stripe
+        fit
+        highlight-current-row
+        style="width: 90%"
+        :height="body_height-180"
+      >
+        <el-table-column
+          label="学校名称"
+        >
+          <template slot-scope="scope">
+            <el-popover trigger="hover" placement="top-start">
+              <p>区域: {{ scope.row.region }}</p>
+              <p>地址: {{ scope.row.school_address }}</p>
+              <div slot="reference" class="name-wrapper">
+                {{ scope.row.school_name }}
+              </div>
+            </el-popover>
+          </template>
+        </el-table-column>
+        <el-table-column label="质量" width="110">
+          <template slot-scope="{row}">
+            {{ row.quality }}
+          </template>
+        </el-table-column>
+      </el-table>
+      <pagination
+        v-show="total>0"
+        :total="total"
+        :page.sync="listQuery.page"
+        :limit.sync="listQuery.limit"
+        style="padding: 0;margin-top: 15px"
+        @pagination="get_school_list"
+      />
+    </el-drawer>
   </div>
 </template>
 
@@ -184,5 +313,14 @@
         float: none !important;
       }
     }
+  }
+  .el-drawer__header span {
+    outline: none;
+  }
+  .el-drawer__header i {
+    outline: none;
+  }
+  .el-drawer__wrapper div {
+    outline: none;
   }
 </style>

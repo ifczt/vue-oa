@@ -208,9 +208,6 @@ export default {
         }
       })
     },
-    test() {
-      console.log(123123)
-    },
     // 补全家长或学生姓名
     auto_cname() {
       var temp = this.temp
