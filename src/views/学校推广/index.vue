@@ -4,7 +4,7 @@
       <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
         <div class="card-panel" @click="dialogFormVisible = true">
           <div class="card-panel-icon-wrapper icon-people">
-            <svg-icon icon-class="peoples" class-name="card-panel-icon" />
+            <svg-icon icon-class="peoples" class-name="card-panel-icon"/>
           </div>
           <div class="card-panel-description">
             <div class="card-panel-text">
@@ -16,7 +16,7 @@
       <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
         <div class="card-panel" @click="show_school">
           <div class="card-panel-icon-wrapper icon-message">
-            <svg-icon icon-class="documentation" class-name="card-panel-icon" />
+            <svg-icon icon-class="documentation" class-name="card-panel-icon"/>
           </div>
           <div class="card-panel-description">
             <div class="card-panel-text">
@@ -30,7 +30,7 @@
       <el-tabs v-model="activeName" style="margin-top:15px;" type="border-card">
         <el-tab-pane v-for="item in tabMapOptions" :key="item.key" :label="item.label" :name="item.key">
           <keep-alive>
-            <tab-pane v-if="activeName===item.key" :type="item.key" />
+            <tab-pane v-if="activeName===item.key" :type="item.key"/>
           </keep-alive>
         </el-tab-pane>
       </el-tabs>
@@ -38,18 +38,18 @@
     <el-dialog title="新增学校宣传" :visible.sync="dialogFormVisible">
       <el-dialog
         width="30%"
-        title="修改学校信息"
+        :title="edit_add"
         :visible.sync="innerVisible"
         append-to-body
       >
-        <el-form :model="school_edit_form">
-          <el-form-item label="学校名称" label-width="120px">
-            <el-input v-model="school_edit_form.school_name" placeholder="请输入内容" />
+        <el-form :model="school_edit_form" ref="school_form" :rules="rules">
+          <el-form-item label="学校名称" label-width="120px" prop="school_name">
+            <el-input v-model="school_edit_form.school_name" placeholder="请输入内容"/>
           </el-form-item>
           <el-form-item label="学校地址" label-width="120px">
-            <el-input v-model="school_edit_form.school_address" placeholder="请输入内容" />
+            <el-input v-model="school_edit_form.school_address" placeholder="请输入内容"/>
           </el-form-item>
-          <el-form-item label="所属区域" label-width="120px">
+          <el-form-item label="所属区域" prop="area" label-width="120px">
             <el-cascader
               v-model="school_edit_form.area"
               size="large"
@@ -58,13 +58,13 @@
               @change="area_select"
             />
           </el-form-item>
-          <el-form-item label="学校质量" label-width="120px">
+          <el-form-item label="学校质量" prop="quality" label-width="120px">
             <el-select v-model="school_edit_form.quality" placeholder="学校质量" clearable class="filter-item">
-              <el-option value="顶尖" />
-              <el-option value="优良" />
-              <el-option value="良好" />
-              <el-option value="一般" />
-              <el-option value="差" />
+              <el-option value="顶尖"/>
+              <el-option value="优良"/>
+              <el-option value="良好"/>
+              <el-option value="一般"/>
+              <el-option value="差"/>
             </el-select>
           </el-form-item>
           <el-form-item label="联系方式" label-width="120px">
@@ -90,17 +90,20 @@
             placeholder="请输入内容"
             @select="query_school_Select"
           >
-            <i slot="suffix" class="el-icon-edit el-input__icon" />
+            <i slot="suffix" class="el-icon-edit el-input__icon"/>
             <template slot-scope="{ item }">
               <div class="name">{{ item.value }}<br><span class="addr">{{ item.region }}</span></div>
             </template>
           </el-autocomplete>
+          <el-tooltip class="item" effect="dark" content="添加学校" placement="top">
+            <el-button type="primary" icon="el-icon-plus" @click="add_school"/>
+          </el-tooltip>
         </el-form-item>
         <el-form-item label="发放量" label-width="120px">
-          <el-input-number v-model="school_form.dosage" :min="0" label="描述文字" />
+          <el-input-number v-model="school_form.dosage" :min="0" label="描述文字"/>
         </el-form-item>
         <el-form-item label="是单数" label-width="120px">
-          <el-input-number v-model="school_form.sales_nums" :min="0" label="描述文字" />
+          <el-input-number v-model="school_form.sales_nums" :min="0" label="描述文字"/>
         </el-form-item>
       </el-form>
       <el-card v-show="school_tip_show" shadow="never">
@@ -108,7 +111,7 @@
         <span><el-tag>地址：{{ school_tip_address }}</el-tag></span>
         <span><el-tag>质量：{{ school_tip_quality }}</el-tag></span>
         <el-tooltip content="点击修改信息" placement="top">
-          <el-button type="primary" icon="el-icon-edit" style="float: right" @click="innerVisible=true" />
+          <el-button type="primary" icon="el-icon-edit" style="float: right" @click="show_edit_school"/>
         </el-tooltip>
       </el-card>
       <div v-show="school_tip_show" style="width: 100%;text-align: center">
@@ -126,18 +129,20 @@
       align="center"
     >
       <el-row>
-        <el-select v-model="listQuery.province" placeholder="省" clearable class="filter-item" style="width: 100px" value-key="id" @change="change_options">
-          <el-option v-for="item in province_options" :id="item.id" :label="item.name" :value="item" />
+        <el-select v-model="listQuery.province" placeholder="省" clearable class="filter-item" style="width: 100px"
+                   value-key="id" @change="change_options">
+          <el-option v-for="item in province_options" :id="item.id" :label="item.name" :value="item"/>
         </el-select>
-        <el-select v-model="listQuery.city" placeholder="市" clearable class="filter-item" style="width: 100px" value-key="id">
-          <el-option v-for="item in city_options" :id="item.id" :label="item.name" :value="item" />
+        <el-select v-model="listQuery.city" placeholder="市" clearable class="filter-item" style="width: 100px"
+                   value-key="id">
+          <el-option v-for="item in city_options" :id="item.id" :label="item.name" :value="item"/>
         </el-select>
         <el-select v-model="listQuery.quality" placeholder="学校质量" clearable class="filter-item" style="width: 100px">
-          <el-option value="顶尖" />
-          <el-option value="优良" />
-          <el-option value="良好" />
-          <el-option value="一般" />
-          <el-option value="差" />
+          <el-option value="顶尖"/>
+          <el-option value="优良"/>
+          <el-option value="良好"/>
+          <el-option value="一般"/>
+          <el-option value="差"/>
         </el-select>
       </el-row>
       <el-row>
@@ -208,6 +213,7 @@
         overflow: hidden;
         padding: 5px 5px 5px 0;
       }
+
       .addr {
         font-size: 12px;
         color: #b4b4b4;
@@ -218,12 +224,15 @@
       }
     }
   }
+
   .tab-container {
     margin: 0px 20px 10px 20px;
   }
+
   .bgColor {
     background-color: rgb(240, 242, 245);
   }
+
   .panel-group {
     .card-panel-col {
       margin-left: 20px;
@@ -263,6 +272,7 @@
       .icon-message {
         color: #36a3f7;
       }
+
       .card-panel-icon-wrapper {
         float: left;
         margin: 14px 0 0 14px;
@@ -314,12 +324,15 @@
       }
     }
   }
+
   .el-drawer__header span {
     outline: none;
   }
+
   .el-drawer__header i {
     outline: none;
   }
+
   .el-drawer__wrapper div {
     outline: none;
   }

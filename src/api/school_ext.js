@@ -60,3 +60,12 @@ export function edit_school_server(data) {
     data
   })
 }
+
+export function add_school_server(data) {
+  return request({
+    url: '/school/add',
+    method: 'post',
+    timeout: 0,
+    data
+  })
+}

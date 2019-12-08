@@ -2,17 +2,25 @@ import tabPane from './components/TabPane'
 import { CodeToText, provinceAndCityData, regionData } from 'element-china-area-data'
 import Pagination from '@/components/Pagination'
 import {
+  add_school_server,
   edit_school_server,
   get_region, get_region_options, get_region_school, input_ext, query_school
 } from '@/api/school_ext'
 import fa from 'element-ui/src/locale/lang/fa'
 import { to_server_order, to_server_region_school } from '@/utils/server_data'
+import { checkPhone } from '@/utils/Global'
 
 export default {
   name: 'school_ext',
   components: { tabPane, Pagination },
   data() {
     return {
+      rules: {
+        school_name: [{ required: true, message: '请输入学校名称' }],
+        area: [{ required: true, message: '请选择学校区域',trigger: "change"}],
+        quality: [{ required: true, message: '请选择学校质量',trigger: 'change' }]
+      },
+      edit_add: '编辑学校信息',
       china_options: regionData,
       innerVisible: false,
       school_tip_region: '',
@@ -46,7 +54,8 @@ export default {
         city: '',
         area: '',
         quality: '',
-        contact_info: ''
+        contact_info: '',
+        region: ''
       },
       school_form: {
         dosage: '',
@@ -79,16 +88,49 @@ export default {
     this.get_region_list()
   },
   methods: {
+    school_edit_form: undefined,
+    show_edit_school() {
+      this.innerVisible = true
+      this.edit_add = '编辑学校信息'
+    },
     school_edit() {
-      this.school_edit_form.province = this.school_edit_form.area[0]
-      this.school_edit_form.city = this.school_edit_form.area[1]
-      this.school_edit_form.area = this.school_edit_form.area[2]
-      edit_school_server(this.school_edit_form).then(response => {
-
+      this.$refs['school_form'].validate(valid => {
+        if (valid) {
+          console.log(this.school_edit_form.area)
+          if(this.school_edit_form.area instanceof Array){
+            this.school_edit_form.province = this.school_edit_form.area[0]
+            this.school_edit_form.city = this.school_edit_form.area[1]
+            this.school_edit_form.area = this.school_edit_form.area[2]
+          }
+          if (this.edit_add === '编辑学校信息') {
+            edit_school_server(this.school_edit_form).then(response => {
+              this.innerVisible = false;
+              this.$notify({
+                title: '编辑成功',
+                message: '成功修改学校，感谢你的付出',
+                type: 'success',
+                duration: 5000
+              })
+            })
+          } else {
+            add_school_server(this.school_edit_form).then(response => {
+              this.innerVisible = false;
+              this.$notify({
+                title: '添加成功',
+                message: '成功添加学校，感谢你的付出',
+                type: 'success',
+                duration: 5000
+              })
+            })
+          }
+        }
       })
     },
     area_select(value) {
-
+      this.school_edit_form.region = ''
+      for (const i in value) {
+        this.school_edit_form.region += CodeToText[value[i]]
+      }
     },
     // 下拉列表选择后 将有市限制的 code转换为名称 没有市限制的在组件里的配置取
     change_options() {
@@ -152,9 +194,23 @@ export default {
       this.school_edit_form.contact_info = item.contact_info
       this.school_edit_form.school_code = item.school_code
       this.school_form.school_code = item.school_code
-      this.school_form.province = item.province
-      this.school_form.city = item.city
-      this.school_form.area = item.area
+      this.school_edit_form.province = this.school_form.province = item.province
+      this.school_edit_form.city = this.school_form.city = item.city
+      this.school_edit_form.area = this.school_form.area = item.area
+    },
+    add_school() {
+      this.innerVisible = true
+      this.edit_add = '新增学校'
+      this.school_edit_form = {
+        school_code: '',
+        school_name: '',
+        school_address: '',
+        province: '',
+        city: '',
+        area: '',
+        quality: '',
+        contact_info: ''
+      }
     },
     // 插入学校宣传
     input_school_ext() {
@@ -173,21 +229,14 @@ export default {
     query_school(queryString, cb) {
       let restaurants = this.restaurants
       if (queryString.length < 2) {
-        if (restaurants.length !== 0) {
-          cb(restaurants)
-        }
         return
       }
       // 缓存联想库为空时 或者查不到联想词时调用
-      if (restaurants.length === 0 || restaurants.filter(this.createFilter(queryString)).length === 0) {
         query_school({ 'value': queryString }).then(response => {
           this.restaurants = restaurants = response.data
           // 调用 callback 返回建议列表的数据
           cb(restaurants)
         })
-      } else {
-        cb(restaurants.filter(this.createFilter(queryString)))
-      }
     },
     createFilter(queryString) {
       return (restaurant) => {
