@@ -1,0 +1,23 @@
+.bottom {
+  margin-top: 13px;
+  line-height: 12px;
+}
+.body{
+  background: #0a76a4;
+}
+.image {
+  width: 100%;
+  display: block;
+}
+.el-dialog__body {
+  padding: 0 20px 20px 20px;
+}
+.clearfix:before,
+.clearfix:after {
+  display: table;
+  content: "";
+}
+
+.clearfix:after {
+  clear: both;
+}

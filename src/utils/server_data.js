@@ -1,5 +1,6 @@
 import _global from '@/utils/Global'
 import { parseTime } from '@/utils/index'
+import { CodeToText } from 'element-china-area-data/dist/app'
 
 export function list_handle(items) {
   // 遍历items 将数据转换为符合标准的数据
@@ -134,4 +135,40 @@ export function to_server_region_school(val) {
   val.province = val.province.id
   val.city = val.city.id
   return val
+}
+
+export function to_asarray(val, pdt, need = true) {
+  const asarray = []
+  const _val = JSON.parse(JSON.stringify(val))
+  if (need) {
+    _val.push({ add: true })
+  }
+  _val.forEach((item, index) => {
+    const arr = Math.floor(index / pdt)
+    if (!asarray[arr]) {
+      asarray[arr] = []
+    }
+    asarray[arr].push(item)
+  })
+
+  for (let i = asarray[asarray.length - 1].length; i < pdt; i++) {
+    asarray[asarray.length - 1].push({})
+  }
+  return asarray
+}
+
+export function hanlder_region_list(list) {
+  for (const item of list) {
+    item.province = CodeToText[item.province]
+    if (item.city) {
+      const arr = item.city.split(',')
+      item.city = []
+      for (const _c of arr) {
+        item.city.push({ name: CodeToText[_c], id: _c })
+      }
+    } else {
+      item.city = [{ name: '全市', id: 'all' }]
+    }
+  }
+  return list
 }

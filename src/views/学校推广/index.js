@@ -4,7 +4,7 @@ import Pagination from '@/components/Pagination'
 import {
   add_school_server,
   edit_school_server,
-  get_region, get_region_options, get_region_school, input_ext, query_school
+  get_province, get_region_options, get_region_school, input_ext, query_school
 } from '@/api/school_ext'
 import fa from 'element-ui/src/locale/lang/fa'
 import { to_server_order, to_server_region_school } from '@/utils/server_data'
@@ -15,10 +15,11 @@ export default {
   components: { tabPane, Pagination },
   data() {
     return {
+      cache_res: '',
       rules: {
         school_name: [{ required: true, message: '请输入学校名称' }],
-        area: [{ required: true, message: '请选择学校区域',trigger: "change"}],
-        quality: [{ required: true, message: '请选择学校质量',trigger: 'change' }]
+        area: [{ required: true, message: '请选择学校区域', trigger: 'change' }],
+        quality: [{ required: true, message: '请选择学校质量', trigger: 'change' }]
       },
       edit_add: '编辑学校信息',
       china_options: regionData,
@@ -70,10 +71,35 @@ export default {
       tabMapOptions: [],
       // 默认打开
       activeName: '',
-      body_height: '600'
+      body_height: '600',
+      table_height: '520'
     }
   },
   watch: {
+    // 选择下拉框后的提示信息 显示开关为FALSE时触发初始化
+    school_tip_show(val) {
+      if (!val) {
+        this.school_tip_region = ''
+        this.school_tip_quality = ''
+        this.school_tip_address = ''
+      }
+    },
+    // 新增学校宣传Dialog 显示开关为FALSE时触发初始化
+    dialogFormVisible(val) {
+      if (!val) {
+        this.school_tip_show = false
+        this.school_form = {
+          dosage: '',
+          sales_nums: '',
+          school: '',
+          school_code: '',
+          province: '',
+          city: '',
+          area: ''
+        }
+      }
+    },
+    // 产科学校列表的Drawer 显示开关为FALSE时触发初始化
     drawer(val) {
       if (!val) {
         this.listQuery.province = ''
@@ -84,11 +110,18 @@ export default {
     }
   },
   created() {
-    this.body_height = window.innerHeight - 50
+    this.body_height = window.innerHeight - 50 + 'px'
+    this.table_height = window.innerHeight - 230 + 'px'
     this.get_region_list()
   },
   methods: {
-    school_edit_form: undefined,
+    tabsClick(tab) {
+      if (this.cache_ref) {
+        console.log(this.$refs)
+        this.$refs[this.cache_ref][0].getList()
+      }
+      this.cache_ref = tab.name
+    },
     show_edit_school() {
       this.innerVisible = true
       this.edit_add = '编辑学校信息'
@@ -96,15 +129,14 @@ export default {
     school_edit() {
       this.$refs['school_form'].validate(valid => {
         if (valid) {
-          console.log(this.school_edit_form.area)
-          if(this.school_edit_form.area instanceof Array){
+          if (this.school_edit_form.area instanceof Array) {
             this.school_edit_form.province = this.school_edit_form.area[0]
             this.school_edit_form.city = this.school_edit_form.area[1]
             this.school_edit_form.area = this.school_edit_form.area[2]
           }
           if (this.edit_add === '编辑学校信息') {
             edit_school_server(this.school_edit_form).then(response => {
-              this.innerVisible = false;
+              this.innerVisible = false
               this.$notify({
                 title: '编辑成功',
                 message: '成功修改学校，感谢你的付出',
@@ -114,7 +146,7 @@ export default {
             })
           } else {
             add_school_server(this.school_edit_form).then(response => {
-              this.innerVisible = false;
+              this.innerVisible = false
               this.$notify({
                 title: '添加成功',
                 message: '成功添加学校，感谢你的付出',
@@ -177,6 +209,7 @@ export default {
     },
     // 获取所负责的学校列表
     get_school_list() {
+      this.listQuery.page = 1
       const send_temp = to_server_region_school(JSON.parse(JSON.stringify(this.listQuery)))
       get_region_school(send_temp).then(response => {
         this.school_list = response.data.items
@@ -214,9 +247,30 @@ export default {
     },
     // 插入学校宣传
     input_school_ext() {
+      if (!this.school_form.school_code) {
+        this.dialogFormVisible = false
+        this.$notify({ title: '错误', message: '参数错误，请核对', type: 'error' })
+        return
+      }
+      if (!this.school_form.dosage) {
+        this.dialogFormVisible = false
+        this.$notify({ title: '错误', message: '没有发放量，无需添加宣传', type: 'error' })
+        return
+      }
+      if (!this.school_form.sales_nums) {
+        this.dialogFormVisible = false
+        this.$notify({ title: '错误', message: '没有是单量，无需添加宣传', type: 'error' })
+        return
+      }
+      if (this.school_form.dosage < this.school_form.sales_nums) {
+        this.dialogFormVisible = false
+        this.$notify({ title: '错误', message: '发放量比是单量还少..怎么可能呢？请如实填写', type: 'error' })
+        return
+      }
       const temp = JSON.parse(JSON.stringify(this.school_form))
       delete temp['school']
       input_ext(temp).then(() => {
+        this.dialogFormVisible = false
         this.$notify({
           title: '新建成功',
           message: '成功新增宣传',
@@ -232,11 +286,11 @@ export default {
         return
       }
       // 缓存联想库为空时 或者查不到联想词时调用
-        query_school({ 'value': queryString }).then(response => {
-          this.restaurants = restaurants = response.data
-          // 调用 callback 返回建议列表的数据
-          cb(restaurants)
-        })
+      query_school({ 'value': queryString }).then(response => {
+        this.restaurants = restaurants = response.data
+        // 调用 callback 返回建议列表的数据
+        cb(restaurants)
+      })
     },
     createFilter(queryString) {
       return (restaurant) => {
@@ -245,13 +299,13 @@ export default {
     },
     // 获取负责区域
     get_region_list() {
-      get_region().then(response => {
+      get_province().then(response => {
         const map_options = response.data
         for (const _map of map_options) {
           _map.label = CodeToText[_map.label]
         }
-        this.tabMapOptions = map_options
-        this.activeName = response.data[0].key
+        this.tabMapOptions = map_options.length !== 0 ? map_options : [{ 'label': '没有所负责区域', 'key': 'None' }]
+        this.activeName = map_options.length !== 0 ? response.data[0].key : 'None'
       })
     }
   }

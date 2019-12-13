@@ -58,6 +58,7 @@ export default {
         ppg_id: null,
         // 学校名称
         school: '',
+        school_code: '',
         // 购买产品
         buy_product: null,
         // 价格
@@ -92,7 +93,7 @@ export default {
       rules: {
         buy_product: [{ required: true, message: '请选择产品' }],
         delivery_time: [{ required: true, message: '请选择派单时间' }],
-        ppg_id: [{ required: true, message: '请输入编号' }, { type: 'number', message: '只能输入数字', trigger: 'blur' }],
+        ppg_id: [{ required: true, message: '请输入编号' }],
         school: [{ required: true, message: '请重现填写正确宣传编号，以自动生成学校信息' }],
         address: [{ required: true, message: '请填写完整地址' }],
         phone: [{ validator: checkPhone, trigger: 'blur', required: true }],
@@ -146,6 +147,7 @@ export default {
         delivery_time: parseTime(new Date(), '{y}-{m}-{d}'),
         ppg_id: '',
         school: '',
+        school_code: '',
         buy_product: null,
         price: 0,
         pay_method: '1',
@@ -163,7 +165,6 @@ export default {
     area_select(value) {
       let area_value = ''
       this.temp.area = value
-      console.log(value)
       for (const i in value) {
         area_value += CodeToText[value[i]]
       }
@@ -243,8 +244,6 @@ export default {
         this.lite_getExpressList()
         _global.product_name_options = response.data
         this.product_name_options = response.data
-      }).catch((error) => {
-        this.lite_getProductList()
       })
     },
     // 加载快递列表
@@ -254,19 +253,20 @@ export default {
         _global.delivery_mode_options = response.data
         this.delivery_mode_options = response.data
         this.getList()
-      }).catch((error) => {
-        this.lite_getExpressList()
       })
     },
 
     changePpg_id(val) {
-      getPpg_id_info({ ppg_id: val }).then(response => {
-        this.temp.school = response.data.school
-        this.temp.publicist = response.data.publicist
-      }).catch((error) => {
-        this.temp.school = null
-        this.temp.publicist = null
-      })
+      if (val.length > 5) {
+        getPpg_id_info({ ppg_id: val }).then(response => {
+          this.temp.school = response.data.school
+          this.temp.publicist = response.data.publicist
+          this.temp.school_code = response.data.school_code
+        }).catch((error) => {
+          this.temp.school = null
+          this.temp.publicist = null
+        })
+      }
     },
     // 更新条目数据
     updateData() {

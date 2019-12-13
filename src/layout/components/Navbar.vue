@@ -24,7 +24,7 @@
           <i class="el-icon-caret-bottom" />
         </div>
         <el-dropdown-menu slot="dropdown">
-          <router-link to="/profile/index">
+          <router-link to="/set_up/edit_password">
             <el-dropdown-item>修改密码</el-dropdown-item>
           </router-link>
           <el-dropdown-item divided>

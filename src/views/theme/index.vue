@@ -31,6 +31,9 @@
       <el-button type="danger">
         Danger
       </el-button>
+      <el-button type="ifczt">
+        Ifczt
+      </el-button>
     </div>
 
     <div class="block">
@@ -86,7 +89,8 @@ export default {
         { name: 'Tag Two', type: 'info' },
         { name: 'Tag Three', type: 'success' },
         { name: 'Tag Four', type: 'warning' },
-        { name: 'Tag Five', type: 'danger' }
+        { name: 'Tag Five', type: 'danger' },
+        { name: 'Tag Six', type: 'ifczt' }
       ],
       slideValue: 50,
       radio: 3

@@ -238,10 +238,10 @@
           </el-tooltip>
           <el-button type="primary" style="margin-left: 0" icon="el-icon-edit" @click="handleUpdate(scope.row)" />
           <el-popconfirm
-            title="这是一段内容确定删除吗？"
+            title="确定要删除这条数据吗？"
             @onConfirm="del_list(scope.$index,scope.row.id)"
           >
-            <el-button slot="reference" type="primary" icon="el-icon-delete" />
+            <el-button slot="reference" :loading="is_del_server" type="primary" icon="el-icon-delete" />
           </el-popconfirm>
         </template>
       </el-table-column>

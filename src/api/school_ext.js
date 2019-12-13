@@ -1,8 +1,8 @@
 import request from '@/utils/request'
 
-export function get_region() {
+export function get_province() {
   return request({
-    url: '/territory/region',
+    url: '/territory/province',
     method: 'get',
     timeout: 0
   })

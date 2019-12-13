@@ -345,3 +345,13 @@ export function removeClass(ele, cls) {
     ele.className = ele.className.replace(reg, ' ')
   }
 }
+
+/**
+ * 自定义函数名：PrefixZero
+ * @param num： 被操作数
+ * @param n： 固定的总位数
+ * @return {string}
+ */
+export function PrefixZero(num, n) {
+  return (Array(n).join(0) + num).slice(-n)
+}

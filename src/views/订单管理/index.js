@@ -11,6 +11,8 @@ import { get_delivery_name, get_product, get_product_name, list_handle, to_serve
 import _global from '@/utils/Global'
 import { checkPhone, loading_options } from '@/utils/Global'
 import { today, tomorrow, after_tomorrow, t_month, t_year, six_month } from '@/utils/time_change'
+import { getToken } from '@/utils/auth'
+import store from '@/store'
 
 export default {
   name: 'OrderManage',
@@ -86,6 +88,7 @@ export default {
         ppg_id: null,
         // 学校名称
         school: '',
+        school_code: '',
         // 购买产品
         buy_product: null,
         // 价格
@@ -207,6 +210,7 @@ export default {
         delivery_time: parseTime(new Date(), '{y}-{m}-{d}'),
         ppg_id: '',
         school: '',
+        school_code: '',
         buy_product: null,
         price: 0,
         pay_method: '1',
@@ -323,13 +327,16 @@ export default {
     },
 
     changePpg_id(val) {
-      getPpg_id_info({ ppg_id: val }).then(response => {
-        this.temp.school = response.data.school
-        this.temp.publicist = response.data.publicist
-      }).catch((error) => {
-        this.temp.school = null
-        this.temp.publicist = null
-      })
+      if (val.length > 5) {
+        getPpg_id_info({ ppg_id: val }).then(response => {
+          this.temp.school = response.data.school
+          this.temp.publicist = response.data.publicist
+          this.temp.school_code = response.data.school_code
+        }).catch((error) => {
+          this.temp.school = null
+          this.temp.publicist = null
+        })
+      }
     },
     // 更新条目数据
     updateData() {

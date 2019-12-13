@@ -22,3 +22,69 @@ export function logout() {
     method: 'post'
   })
 }
+
+export function edit_password(data) {
+  return request({
+    url: '/user/edit_password',
+    method: 'post',
+    data
+  })
+}
+
+export function get_power_group() {
+  return request({
+    url: '/user/get_power_group',
+    method: 'get'
+  })
+}
+
+export function add_user(data) {
+  return request({
+    url: '/user/add',
+    method: 'post',
+    data
+  })
+}
+
+export function edit_user(data) {
+  return request({
+    url: '/user/edit',
+    method: 'post',
+    data
+  })
+}
+
+export function del_user(data) {
+  return request({
+    url: '/user/del',
+    method: 'post',
+    timeout: 5000,
+    data
+  })
+}
+
+export function active_user(data) {
+  return request({
+    url: '/user/active',
+    method: 'post',
+    timeout: 5000,
+    data
+  })
+}
+
+export function get_list(data) {
+  return request({
+    url: '/user/get_list',
+    method: 'post',
+    timeout: 5000,
+    data
+  })
+}
+
+export function get_publicist_list() {
+  return request({
+    url: '/user/get_publicist_list',
+    method: 'post',
+    timeout: 5000
+  })
+}

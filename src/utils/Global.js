@@ -13,14 +13,15 @@ export const checkPhone = (rule, value, callback) => {
     }
   }
 }
-export const loading_options={
+
+export const loading_options = {
   lock: true,
-    text: '加载服务中，请稍等',
-    spinner: 'el-icon-loading',
-    background: 'rgba(255,255,255,0.19)'
+  text: '加载服务中，请稍等',
+  spinner: 'el-icon-loading',
+  background: 'rgba(255,255,255,0.19)'
 }
 export default {
   delivery_mode_options,
   product_name_options,
-  DELIVERY_STATE,
+  DELIVERY_STATE
 }

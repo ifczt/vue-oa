@@ -120,7 +120,7 @@ export const asyncRoutes = [
         path: '/school_ext',
         component: () => import('@/views/学校推广/index.vue'),
         name: '学校推广',
-        meta: { title: '学校推广', icon: 'education', affix: true }
+        meta: { title: '学校推广', icon: 'education', affix: true, roles: ['IFCZT', 'PUBLICIST'] }
       }
     ]
   },
@@ -139,7 +139,7 @@ export const asyncRoutes = [
   },
 
   {
-    path: '/error',
+    path: '/set_up',
     component: Layout,
     redirect: 'noRedirect',
     name: 'ErrorPages',
@@ -150,37 +150,37 @@ export const asyncRoutes = [
     children: [
       {
         path: 'user_manage',
-        component: () => import('@/views/系统管理/账号管理/index'),
+        component: () => import('@/views/系统管理/账号管理/index.vue'),
         name: 'user_manage',
         meta: { title: '账号管理', noCache: true }
       },
       {
-        path: '405',
-        component: () => import('@/views/error-page/404'),
-        name: 'Page4041',
+        path: 'manage_region',
+        component: () => import('@/views/系统管理/区域管理/index.vue'),
+        name: 'manage_region',
         meta: { title: '区域管理', noCache: true }
       },
       {
-        path: '406',
-        component: () => import('@/views/error-page/404'),
-        name: 'Page4042',
+        path: 'manage_express',
+        component: () => import('@/views/系统管理/快递管理/index.vue'),
+        name: 'manage_express',
         meta: { title: '快递公司管理', noCache: true }
       },
       {
-        path: '407',
-        component: () => import('@/views/error-page/404'),
-        name: 'Page4043',
+        path: 'manage_product',
+        component: () => import('@/views/系统管理/产品管理/index.vue'),
+        name: 'manage_product',
         meta: { title: '产品管理', noCache: true }
       },
       {
-        path: 'abc',
-        // component: () => import('@vue/test-utils/dist'),
+        path: 'edit_password',
+        component: () => import('@/views/系统管理/密码修改/index.vue'),
         name: 'passwords',
         meta: { title: '密码修改' }
       }
     ]
   },
-  // 404 page must be placed at the end !!!
+  // 404 页面必须放在末尾 !!!
   { path: '*', redirect: '/404', hidden: true }
 ]
 

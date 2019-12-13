@@ -1,0 +1,21 @@
+.bottom {
+  margin-top: 13px;
+  line-height: 12px;
+}
+.body{
+  background: #0a76a4;
+}
+.image {
+  width: 100%;
+  display: block;
+}
+
+.clearfix:before,
+.clearfix:after {
+  display: table;
+  content: "";
+}
+
+.clearfix:after {
+  clear: both;
+}

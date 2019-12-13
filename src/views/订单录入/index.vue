@@ -154,7 +154,7 @@
         </el-form-item>
         <el-form-item label="宣传编号" prop="ppg_id">
           <el-input
-            v-model.number="temp.ppg_id"
+            v-model="temp.ppg_id"
             show-word-limit
             suffix-icon="el-icon-share"
             maxlength="6"
@@ -226,6 +226,7 @@
 </template>
 <script src="./index.js" type="text/javascript"></script>
 <style>
+
   .edit-input {
     padding-right: 100px;
   }

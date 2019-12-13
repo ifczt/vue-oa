@@ -80,7 +80,9 @@ export default {
     }
   },
   created() {
-    this.getList()
+    if (this.type !== 'None') {
+      this.getList()
+    }
     this.body_height = window.innerHeight - 350
   },
   methods: {
