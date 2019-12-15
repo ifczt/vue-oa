@@ -172,3 +172,8 @@ export function hanlder_region_list(list) {
   }
   return list
 }
+
+export function randomColor() {
+  const colors = ['','success','info','warning','danger']
+  return colors[Math.floor(Math.random()*colors.length)]
+}

@@ -1,16 +1,18 @@
 import { getExpressList } from '@/api/order'
-import { hanlder_region_list, to_asarray } from '@/utils/server_data'
+import { hanlder_region_list, randomColor, to_asarray } from '@/utils/server_data'
 import { active_express, creat_express, del_express, edit_express } from '@/api/express'
 import { get_RegionList, getUserRegionList, remove_city } from '@/api/region'
 import { get_publicist_list } from '@/api/user'
 import it from 'element-ui/src/locale/lang/it'
 import { TextToCode } from 'element-china-area-data/dist/app'
 import Pagination from '@/components/Pagination'
+
 export default {
   name: 'manage_region',
   components: { Pagination },
   data() {
     return {
+      colors: ['', 'success', 'info', 'warning', 'danger'],
       total: 0,
       region_list: [],
       table_height: '520',

@@ -32,6 +32,20 @@
           <el-table-column label="负责市">
             <template slot-scope="scope">
               <el-tag
+                :type="colors[Math.floor(Math.random()*colors.length)]"
+                v-for="tag in scope.row.city"
+                :key="tag.id"
+                style="margin-right: 3px;margin-bottom: 3px"
+                closable
+                @close="tagClose(tag,scope.row,scope.$index)"
+              >{{ tag.name }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column label="签约产品">
+            <template slot-scope="scope">
+              <el-tag
+                :type="colors[Math.floor(Math.random()*colors.length)]"
                 v-for="tag in scope.row.city"
                 :key="tag.id"
                 style="margin-right: 3px;margin-bottom: 3px"

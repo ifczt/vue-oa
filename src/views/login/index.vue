@@ -65,6 +65,7 @@
 
 <script>
 import { validUsername } from '@/utils/validate'
+import { getPassWord, getUserName, setPassWord, setUserName } from '../../utils/auth'
 
 export default {
   name: 'Login',
@@ -85,8 +86,8 @@ export default {
     }
     return {
       loginForm: {
-        username: 'ifczt',
-        password: 'ifczt'
+        username: getUserName(),
+        password: getPassWord(),
       },
       loginRules: {
         username: [{ required: true, trigger: 'blur', validator: validateUsername }],
@@ -113,6 +114,7 @@ export default {
     }
   },
   created() {
+    console.log(getUserName())
     // window.addEventListener('storage', this.afterQRScan)
   },
   mounted() {
@@ -152,6 +154,8 @@ export default {
     handleLogin() {
       this.$refs.loginForm.validate(valid => {
         if (valid) {
+          setUserName(this.loginForm.username)
+          setPassWord(this.loginForm.password)
           this.loading = true
           this.$store.dispatch('user/login', this.loginForm)
             .then(() => {

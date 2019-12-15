@@ -170,7 +170,7 @@
           style="margin-top: 10px;"
           type="success"
           icon="el-icon-search"
-          @click="get_school_list"
+          @click="search_school_list"
         />
       </el-row>
       <el-table

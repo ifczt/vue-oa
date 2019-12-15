@@ -106,6 +106,7 @@ export default {
         this.listQuery.city = ''
         this.listQuery.quality = ''
         this.listQuery.school_name = ''
+        this.city_options =[]
       }
     }
   },
@@ -207,9 +208,12 @@ export default {
       this.school_table_loading = true
       this.get_area_options()
     },
+    search_school_list(){
+      this.listQuery.page = 1;
+      this.get_school_list()
+    },
     // 获取所负责的学校列表
     get_school_list() {
-      this.listQuery.page = 1
       const send_temp = to_server_region_school(JSON.parse(JSON.stringify(this.listQuery)))
       get_region_school(send_temp).then(response => {
         this.school_list = response.data.items
