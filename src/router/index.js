@@ -124,20 +124,6 @@ export const asyncRoutes = [
       }
     ]
   },
-
-  {
-    path: '/tab',
-    component: Layout,
-    children: [
-      {
-        path: 'index',
-        component: () => import('@/views/error-page/404'),
-        name: 'Tab',
-        meta: { title: '回款与查账', icon: 'tab' }
-      }
-    ]
-  },
-
   {
     path: '/set_up',
     component: Layout,
@@ -158,19 +144,19 @@ export const asyncRoutes = [
         path: 'manage_region',
         component: () => import('@/views/系统管理/区域管理/index.vue'),
         name: 'manage_region',
-        meta: { title: '区域管理', noCache: true }
+        meta: { title: '区域管理', noCache: true, roles: ['IFCZT', 'SUPER_ADMIN'] }
       },
       {
         path: 'manage_express',
         component: () => import('@/views/系统管理/快递管理/index.vue'),
         name: 'manage_express',
-        meta: { title: '快递公司管理', noCache: true }
+        meta: { title: '快递公司管理', noCache: true, roles: ['IFCZT', 'SUPER_ADMIN', 'ADMIN'] }
       },
       {
         path: 'manage_product',
         component: () => import('@/views/系统管理/产品管理/index.vue'),
         name: 'manage_product',
-        meta: { title: '产品管理', noCache: true }
+        meta: { title: '产品管理', noCache: true, roles: ['IFCZT', 'SUPER_ADMIN', 'ADMIN'] }
       },
       {
         path: 'edit_password',

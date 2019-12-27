@@ -36,6 +36,30 @@ export const t_year = {
     picker.$emit('pick', [start, end])
   }
 }
+export const this_year = {
+  text: '今年',
+  onClick(picker) {
+    const end = new Date(new Date().getFullYear(), 11, 31)
+    const start = new Date(new Date().getFullYear(), 0, 1)
+    picker.$emit('pick', [start, end])
+  }
+}
+export const first_half_year = {
+  text: '上半年',
+  onClick(picker) {
+    const end = new Date(new Date().getFullYear(), 5, 30)
+    const start = new Date(new Date().getFullYear(), 0, 1)
+    picker.$emit('pick', [start, end])
+  }
+}
+export const second_half_year = {
+  text: '下半年',
+  onClick(picker) {
+    const end = new Date(new Date().getFullYear(), 11, 31)
+    const start = new Date(new Date().getFullYear(), 5, 30)
+    picker.$emit('pick', [start, end])
+  }
+}
 export const six_month = {
   text: '最近六个月',
   onClick(picker) {
@@ -44,4 +68,15 @@ export const six_month = {
     start.setMonth(start.getMonth() - 6)
     picker.$emit('pick', [start, end])
   }
+}
+export function formatDate(numb, format) {
+  const time = new Date((numb - 1) * 24 * 3600000 + 1)
+  time.setYear(time.getFullYear() - 70)
+  const year = time.getFullYear() + ''
+  const month = time.getMonth() + 1 + ''
+  const date = time.getDate() - 1 + ''
+  if (format && format.length === 1) {
+    return year + format + month + format + date
+  }
+  return year + (month < 10 ? '0' + month : month) + (date < 10 ? '0' + date : date)
 }

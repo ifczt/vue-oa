@@ -6,7 +6,7 @@
         :span="4"
         style="margin:20px 20px 0 20px;"
       >
-        <el-card v-show="item.id" v-if="!item.add" :body-style="{ padding: '0px' }">
+        <el-card v-show="item.id" v-if="!item.add" :body-style="{ padding: '0px' }" style="width: 220px">
           <el-image
             v-if="item.id"
             style="height: 150px;width: 100%"

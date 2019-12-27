@@ -1,5 +1,5 @@
 <template>
-  <div class="bgColor" :style="{'height': body_height}">
+  <div>
     <el-row :gutter="30" class="panel-group">
       <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
         <div class="card-panel" @click="dialogFormVisible = true">
@@ -240,10 +240,6 @@
 
   .tab-container {
     margin: 0px 20px 10px 20px;
-  }
-
-  .bgColor {
-    background-color: rgb(240, 242, 245);
   }
 
   .panel-group {

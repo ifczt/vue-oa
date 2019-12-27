@@ -1,5 +1,5 @@
 <template>
-  <div :style="{'height': body_height+'px','background-color':'rgba(153,153,153,0.16)'}">
+  <div style="margin-top: 15vh">
     <el-row type="flex" justify="center" align="middle" style="height: 100%">
       <el-col :span="6">
         <el-card :body-style="{ padding: '0px'}" shadow="hover">

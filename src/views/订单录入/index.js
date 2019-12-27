@@ -11,6 +11,7 @@ import { get_delivery_name, get_product_name, list_handle, to_server_order } fro
 import _global from '@/utils/Global'
 import { checkPhone, loading_options } from '@/utils/Global'
 import { today, tomorrow, after_tomorrow } from '@/utils/time_change'
+import { isArray } from '@/utils/validate'
 
 export default {
   name: 'OrderInput',
@@ -42,10 +43,14 @@ export default {
       },
       // 表单数据
       temp: {
+        buy_num: 1,
+        // 备注
+        remarks: '',
         // 编号
         id: '',
         // 加盟商
         publicist: '',
+        publicist_name: '',
         // 订单录入员
         input_staff: this.name,
         // 物流状态
@@ -140,6 +145,8 @@ export default {
     resetTemp() {
       this.is_server_input = false
       this.temp = {
+        buy_num: 1,
+        remarks: '',
         id: '',
         publicist: '',
         input_staff: this.name,
@@ -190,6 +197,8 @@ export default {
             return
           }
           const send_temp = to_server_order(JSON.parse(JSON.stringify(this.temp)))
+          send_temp.price = send_temp.price * send_temp.buy_num
+          send_temp.consignee = send_temp.consignee === '2' ? send_temp.student : send_temp.parent
           this.temp.price = send_temp.price
           inputOrder(send_temp).then(response => {
             this.temp.buy_product = this.temp.buy_product.name
@@ -205,6 +214,8 @@ export default {
               type: 'success',
               duration: 5000
             })
+          }).catch(() => {
+            this.is_server_input = false
           })
         }
       })
@@ -260,7 +271,8 @@ export default {
       if (val.length > 5) {
         getPpg_id_info({ ppg_id: val }).then(response => {
           this.temp.school = response.data.school
-          this.temp.publicist = response.data.publicist
+          this.temp.publicist = response.data.publicist[0]
+          this.temp.publicist_name = response.data.publicist[1]
           this.temp.school_code = response.data.school_code
         }).catch((error) => {
           this.temp.school = null
@@ -273,7 +285,14 @@ export default {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           const tempData = to_server_order(Object.assign({}, this.temp))
+          tempData.price = tempData.price * tempData.buy_num
           this.temp.price = tempData.price
+          tempData.consignee = tempData.consignee === '2' ? tempData.student : tempData.parent
+          if (isArray(tempData.publicist)) {
+            tempData.publicist = tempData.publicist[0]
+          } else {
+            delete tempData.publicist
+          }
           update_order(tempData).then(() => {
             for (const v of this.list) {
               if (v.id === this.temp.id) {

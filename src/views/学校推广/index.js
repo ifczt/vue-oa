@@ -71,7 +71,6 @@ export default {
       tabMapOptions: [],
       // 默认打开
       activeName: '',
-      body_height: '600',
       table_height: '520'
     }
   },
@@ -106,19 +105,17 @@ export default {
         this.listQuery.city = ''
         this.listQuery.quality = ''
         this.listQuery.school_name = ''
-        this.city_options =[]
+        this.city_options = []
       }
     }
   },
   created() {
-    this.body_height = window.innerHeight - 50 + 'px'
     this.table_height = window.innerHeight - 230 + 'px'
     this.get_region_list()
   },
   methods: {
     tabsClick(tab) {
       if (this.cache_ref) {
-        console.log(this.$refs)
         this.$refs[this.cache_ref][0].getList()
       }
       this.cache_ref = tab.name
@@ -169,7 +166,6 @@ export default {
     change_options() {
       this.listQuery.city = ''
       const _arr = []
-      console.log(this.city_options_obj[this.listQuery.province.id])
       if (this.city_options_obj[this.listQuery.province.id]) {
         if (this.city_options_obj[parseInt(this.listQuery.province.id)].length > 0 && typeof (this.city_options_obj[parseInt(this.listQuery.province.id)][0]) === 'string') {
           for (const _c of this.city_options_obj[parseInt(this.listQuery.province.id)]) {
@@ -208,8 +204,8 @@ export default {
       this.school_table_loading = true
       this.get_area_options()
     },
-    search_school_list(){
-      this.listQuery.page = 1;
+    search_school_list() {
+      this.listQuery.page = 1
       this.get_school_list()
     },
     // 获取所负责的学校列表
@@ -274,6 +270,7 @@ export default {
       const temp = JSON.parse(JSON.stringify(this.school_form))
       delete temp['school']
       input_ext(temp).then(() => {
+        this.$refs[this.school_form.province][0].getList()
         this.dialogFormVisible = false
         this.$notify({
           title: '新建成功',
@@ -312,5 +309,13 @@ export default {
         this.activeName = map_options.length !== 0 ? response.data[0].key : 'None'
       })
     }
+  },
+  beforeCreate() {
+    window.document.body.style.backgroundColor = '#F0F2F5'
+    next()
+  },
+  beforeDestroy() {
+    window.document.body.style.backgroundColor = ''
+    next()
   }
 }

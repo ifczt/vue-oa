@@ -38,13 +38,13 @@
 
       <el-table-column width="110px" label="目前销量">
         <template slot-scope="scope">
-          0
+          {{ scope.row.sales_volume }}套
         </template>
       </el-table-column>
 
       <el-table-column label="预计收入" width="110">
         <template slot-scope="{row}">
-          0
+          {{ row.income }}元
         </template>
       </el-table-column>
     </el-table>

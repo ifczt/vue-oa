@@ -23,9 +23,7 @@ export default {
     ])
   },
   created() {
-    if (!this.roles.includes('IFCZT')) {
-      this.currentRole = 'datashow_editor'
-    }
+
   }
 }
 </script>

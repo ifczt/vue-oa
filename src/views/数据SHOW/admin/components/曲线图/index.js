@@ -1,12 +1,7 @@
-<template>
-  <div :class="className" :style="{height:height,width:width}" />
-</template>
-
-<script>
 import echarts from 'echarts'
 
 require('echarts/theme/macarons') // echarts theme
-import resize from './mixins/resize'
+import resize from '../mixins/resize'
 
 export default {
   mixins: [resize],
@@ -41,12 +36,12 @@ export default {
     }
   },
   watch: {
-    chartData: {
-      deep: true,
-      handler(val) {
-        this.setOptions(val)
-      }
-    },
+    // chartData: {
+    //   deep: true,
+    //   handler(val) {
+    //     this.chart.setOption({series:val})
+    //   }
+    // },
     options: {
       handler(options) {
         this.chart.setOption(this.options)
@@ -73,4 +68,3 @@ export default {
     }
   }
 }
-</script>

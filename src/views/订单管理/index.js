@@ -1,7 +1,7 @@
 import { CodeToText, regionDataPlus } from 'element-china-area-data'
 import {
   fetchList, inputOrder, getProductList, getExpressList,
-  getPpg_id_info, del_list, update_order, apply_discount_state_change
+  getPpg_id_info, del_list, update_order, apply_discount_state_change, update_logistics, get_finance_list
 } from '@/api/order'
 import Pagination from '@/components/Pagination'
 import { parseTime } from '@/utils'
@@ -10,16 +10,31 @@ import { mapGetters } from 'vuex'
 import { get_delivery_name, get_product, get_product_name, list_handle, to_server_order } from '@/utils/server_data'
 import _global from '@/utils/Global'
 import { checkPhone, loading_options } from '@/utils/Global'
-import { today, tomorrow, after_tomorrow, t_month, t_year, six_month } from '@/utils/time_change'
+import { today, tomorrow, after_tomorrow, t_month, t_year, six_month, formatDate } from '@/utils/time_change'
 import { getToken } from '@/utils/auth'
 import store from '@/store'
+import UploadExcelComponent from '@/components/UploadExcel/index.vue'
+import { isArray } from '@/utils/validate'
+import { query_name } from '@/api/user'
 
 export default {
   name: 'OrderManage',
   list: [],
-  components: { Pagination },
+  components: { Pagination, UploadExcelComponent },
   data() {
     return {
+      t_payment_state: '0',
+      t_apply_discount_state: '0',
+      pick_index: '',
+      return_and_swap_title: '',
+      return_temp: {
+        id: '',
+        courier_code_return: '',
+        courier_code_relapse: '',
+        payment: '',
+        delivery_state: ''
+      },
+      tips_text: '上传文件后，自动开始批量修改，请勿中途退出',
       apply_discount_text(bool) {
         return bool ? '拒绝折扣申请' : '同意折扣申请'
       },
@@ -31,6 +46,10 @@ export default {
         return bool ? 'el-icon-close' : 'el-icon-check'
       },
       drawer: false,
+      // 导入数据面板 显示开关
+      upload: false,
+      // 退货处理面板 显示开关
+      return_goods_visible: false,
       direction: 'ttb',
       is_del_server: false,
       is_server_input: false,
@@ -47,12 +66,16 @@ export default {
       },
       // 列表
       list: [],
+      data_list: [],
       // 列表总条目数
       total: 0,
       // 列表加载动画
       listLoading: false,
       // 跳转页数据- page当前页 limit一页多少条数据
+      financeQuery: {},
       listQuery: {
+        payment_state: '',
+        apply_discount_state: '',
         page: 1,
         limit: 20,
         manage: true,
@@ -62,6 +85,7 @@ export default {
         delivery_state: '',
         buy_product: '',
         input_staff: '',
+        input_staff_id: '',
         area: '',
         time_slot_value: '',
         type_time_slot: '',
@@ -71,6 +95,7 @@ export default {
       },
       // 表单数据
       temp: {
+        remarks: '',
         auxiliary_apply: false,
         // 编号
         id: '',
@@ -91,6 +116,7 @@ export default {
         school_code: '',
         // 购买产品
         buy_product: null,
+        buy_num: 1,
         // 价格
         price: 0,
         // 付款方式 1货到付款 2微信支付
@@ -106,7 +132,8 @@ export default {
         // 区域
         area: [],
         // 申请折扣
-        apply_discount_state: false
+        apply_discount_state: false,
+        apply_discount_state_bool: false
       },
       // 产品列表
       product_name_options: [],
@@ -123,7 +150,7 @@ export default {
       rules: {
         buy_product: [{ required: true, message: '请选择产品' }],
         delivery_time: [{ required: true, message: '请选择派单时间' }],
-        ppg_id: [{ required: true, message: '请输入编号' }, { type: 'number', message: '只能输入数字', trigger: 'blur' }],
+        ppg_id: [{ required: true, message: '请输入编号' }],
         school: [{ required: true, message: '请重现填写正确宣传编号，以自动生成学校信息' }],
         address: [{ required: true, message: '请填写完整地址' }],
         phone: [{ validator: checkPhone, trigger: 'blur', required: true }],
@@ -139,6 +166,54 @@ export default {
     Loading.service(loading_options)
   },
   methods: {
+    query_name_select(item) {
+      this.listQuery.input_staff_id = item.id
+    },
+    queryName(queryString, cb) {
+      if (queryString.length < 1) {
+        return
+      }
+      query_name({ 'value': queryString }).then(response => {
+        cb(response.data)
+      })
+    },
+    switch_value(type) {
+      if (type === 'apply') {
+        this.listQuery.apply_discount_state = this.t_apply_discount_state
+      } else {
+        this.listQuery.payment_state = this.t_payment_state
+      }
+    },
+    return_swap() {
+      const send_temp = JSON.parse(JSON.stringify(this.return_temp))
+      if (this.return_and_swap_title === '换货处理') {
+        send_temp.courier_code_relapse = send_temp.courier_code_return
+        delete send_temp.courier_code_return
+      } else {
+        delete send_temp.courier_code_relapse
+      }
+      update_order(send_temp).then(() => {
+        this.return_goods_visible = false
+        this.list[this.pick_index].delivery_state = this.return_and_swap_title === '换货处理' ? '换货' : '退货'
+        this.list[this.pick_index].courier_code_return = send_temp.courier_code_return
+        this.list[this.pick_index].courier_code_relapse = send_temp.courier_code_relapse
+        this.list[this.pick_index].payment = send_temp.payment
+        this.return_temp = {
+          id: '',
+          courier_code_return: '',
+          courier_code_relapse: '',
+          payment: '',
+          delivery_state: ''
+        }
+      })
+    },
+    return_goods(id, type, index) {
+      this.pick_index = index
+      this.return_and_swap_title = type === 'return' ? '退货处理' : '换货处理'
+      this.return_goods_visible = true
+      this.return_temp.id = id
+      this.return_temp.delivery_state = type === 'return' ? 3 : 2// 退货为3 换货为2
+    },
     expandChange(row, expandedRows) {
       const that = this
       // 只展开一行
@@ -153,9 +228,11 @@ export default {
     },
     search_cri() {
       this.listQuery.page = 1
+      this.listQuery.input_staff = this.listQuery.input_staff_id
+      delete this.listQuery.input_staff_id
       if (this.listQuery.area || this.listQuery.buy_product.length || this.listQuery.courier_code || this.listQuery.delivery.length ||
         this.listQuery.delivery_state.length || this.listQuery.input_staff || this.listQuery.time_slot_value || this.listQuery.type_time_slot ||
-        this.listQuery.parent || this.listQuery.phone) {
+        this.listQuery.parent || this.listQuery.phone || this.listQuery.payment_state.length || this.listQuery.apply_discount_state.length) {
         this.getList()
         this.handleClose()
       } else {
@@ -168,6 +245,7 @@ export default {
       } else {
         this.drawer = false
       }
+      this.financeQuery = this.listQuery
       this.listQuery = {
         page: 1,
         limit: 20,
@@ -176,13 +254,18 @@ export default {
         delivery_state: '',
         buy_product: '',
         input_staff: '',
+        input_staff_id: '',
         area: '',
         time_slot_value: '',
         type_time_slot: '',
         delivery: '',
         phone: '',
-        parent: ''
+        parent: '',
+        payment_state: '',
+        apply_discount_state: ''
       }
+      this.t_payment_state = '0'
+      this.t_apply_discount_state = '0'
     },
     tableRowClassName({ row, rowIndex }) {
       if (row.price === 0 && row.pay_method !== '2') {
@@ -193,6 +276,7 @@ export default {
     // 获取列表数据
     getList() {
       this.listLoading = true
+      delete this.listQuery.input_staff_id
       fetchList(this.listQuery).then(response => {
         this.list = list_handle(response.data.items)
         this.total = response.data.total
@@ -203,6 +287,8 @@ export default {
     resetTemp() {
       this.is_server_input = false
       this.temp = {
+        remarks: '',
+        buy_num: 1,
         id: '',
         publicist: '',
         input_staff: this.name,
@@ -222,7 +308,8 @@ export default {
         area: [],
         consignee: '1',
         apply_discount_state: false,
-        auxiliary_apply: false
+        auxiliary_apply: false,
+        apply_discount_state_bool: false
       }
     },
     // 区域选中
@@ -234,46 +321,6 @@ export default {
         area_value += CodeToText[value[i]]
       }
       this.temp.address = area_value
-    },
-    // 新建视图
-    handleCreate() {
-      this.resetTemp()
-      this.dialogStatus = 'create'
-      this.dialogFormVisible = true
-      this.$nextTick(() => {
-        this.$refs['dataForm'].clearValidate()
-      })
-    },
-    // 插入数据
-    createData() {
-      this.is_server_input = true
-      this.$refs['dataForm'].validate(valid => {
-        if (valid) {
-          if (this.temp.student === '' || this.temp.parent === '') {
-            this.$message('家长和学生姓名不能为空')
-            this.is_server_input = false
-            return
-          }
-          this.temp.price = this.temp.pay_method === 2 ? 0 : this.temp.price
-          this.temp.price = this.temp.apply_discount_state ? this.temp.price : this.temp.buy_product.price
-          const send_temp = to_server_order(JSON.parse(JSON.stringify(this.temp)))
-          inputOrder(send_temp).then(response => {
-            this.temp.buy_product = this.temp.buy_product.name
-            this.temp.delivery = this.temp.delivery.name
-            this.temp.id = response.data.id
-            this.temp.delivery_state = response.data.delivery_state
-            this.list.unshift(this.temp)
-            this.dialogFormVisible = false
-            this.is_server_input = false
-            this.$notify({
-              title: '新建成功',
-              message: '成功录入订单',
-              type: 'success',
-              duration: 5000
-            })
-          })
-        }
-      })
     },
     // 补全家长或学生姓名
     auto_cname() {
@@ -310,8 +357,6 @@ export default {
         this.lite_getExpressList()
         _global.product_name_options = response.data
         this.product_name_options = response.data
-      }).catch((error) => {
-        this.lite_getProductList()
       })
     },
     // 加载快递列表
@@ -321,8 +366,6 @@ export default {
         _global.delivery_mode_options = response.data
         this.delivery_mode_options = response.data
         this.getList()
-      }).catch((error) => {
-        this.lite_getExpressList()
       })
     },
 
@@ -344,12 +387,22 @@ export default {
         if (valid) {
           const tempData = to_server_order(Object.assign({}, this.temp))
           this.temp.price = tempData.price
+          tempData.consignee = tempData.consignee === '2' ? tempData.student : tempData.parent
+          if (isArray(tempData.publicist)) {
+            tempData.publicist = tempData.publicist[0]
+          } else {
+            delete tempData.publicist
+          }
+          delete tempData.school
+          delete tempData.auxiliary_apply
           update_order(tempData).then(() => {
             for (const v of this.list) {
               if (v.id === this.temp.id) {
                 const index = this.list.indexOf(v)
                 this.temp.buy_product = get_product_name(this.temp.buy_product)
                 this.temp.delivery = get_delivery_name(this.temp.delivery)
+                this.temp.apply_discount_state_bool = this.temp.apply_discount_state ? 1 : 0
+                this.temp.auxiliary_apply = this.temp.apply_discount_state_bool !== 1
                 this.list.splice(index, 1, this.temp)
                 break
               }
@@ -380,7 +433,7 @@ export default {
         }
       }
       apply_discount_state_change({ id: id, apply_discount_state: bool ? 2 : 0, price: v.price }).then(() => {
-
+        v.apply_discount_state_bool = bool ? 2 : 0
       })
     },
     // 删除条目
@@ -392,9 +445,128 @@ export default {
       }).catch((error) => {
         this.is_del_server = false
       })
+    },
+    handleDownload() {
+      Loading.service(loading_options)
+      this.listQuery.limit = 5000
+      this.listQuery.delivery_state = [0]
+      fetchList(this.listQuery).then(response => {
+        this.data_list = list_handle(response.data.items)
+        console.log(this.data_list)
+        if (this.data_list.length === 0) {
+          this.$message.error('没有任何数据需要导出')
+          Loading.service(loading_options).close()
+          this.listQuery.limit = 20
+          this.listQuery.delivery_state = ''
+          return
+        }
+        import('@/vendor/Export2Excel').then(excel => {
+          const tHeader = ['订单编号', '产品', '收件人', '手机号码', '地址', '价格', '数量', '支付方式', '备注']
+          const filterVal = ['id', 'buy_product', 'parent', 'phone', 'address', 'price', 'buy_num', 'pay_method', 'remarks']
+          const data = this.formatJson(filterVal, this.data_list)
+          excel.export_json_to_excel({
+            header: tHeader,
+            data,
+            filename: '订单数据-管理'
+          })
+          Loading.service(loading_options).close()
+          this.listQuery.limit = 20
+          this.listQuery.delivery_state = ''
+        })
+      })
+    },
+    formatJson(filterVal, jsonData) {
+      return jsonData.map(v => filterVal.map(j => {
+        if (j === 'pay_method') {
+          return v[j] === '1' ? '货到付款' : '寄付'
+        }
+        if (j === 'city' || j === 'province') {
+          return CodeToText[Number(v[j])]
+        }
+        return v[j]
+      }))
+    },
+    beforeUploadExc(file) {
+      const isLt1M = file.size / 1024 / 1024 < 1
+
+      if (isLt1M) {
+        return true
+      }
+
+      this.$message({ message: '文件大小超出.', type: 'warning' })
+      return false
+    },
+    uploadExcSuccess({ results, header }) {
+      Loading.service(loading_options)
+      for (const i of results) {
+        if (i.refund_time) {
+          i.refund_time = formatDate(i.refund_time, '/')
+        }
+      }
+      update_logistics({ list: results }).then(() => {
+        Loading.service(loading_options).close()
+        this.upload = false
+        this.$notify({
+          title: '我恭喜你发财，我恭喜你精彩',
+          message: '导入成功',
+          type: 'success'
+        })
+      })
+    },
+    downTemplate(type) {
+      let tHeader = []
+      if (type === 'wl') {
+        tHeader = ['id', 'courier_code', 'delivery_state', 'err_text']
+      }
+      if (type === 'th') {
+        tHeader = ['id', 'courier_code_return', 'freight', 'payment', 'delivery_state', 'err_text']
+      }
+      if (type === 'cw') {
+        tHeader = ['id', 'refund_time', 'payment']
+      }
+      if (type === 'yf') {
+        tHeader = ['id', 'courier_code', 'freight']
+      }
+      import('@/vendor/Export2Excel').then(excel => {
+        const data = []
+        excel.export_json_to_excel({
+          header: tHeader,
+          data,
+          filename: '导入模板'
+        })
+      })
+    },
+    financeDownload() {
+      if (Object.keys(this.financeQuery).length === 0) {
+        this.$message.error('请先进行搜索，再导出数据')
+        return
+      }
+      delete this.financeQuery.page
+      delete this.financeQuery.limit
+      delete this.financeQuery.manage
+      get_finance_list(this.financeQuery).then(response => {
+        import('@/vendor/Export2Excel').then(excel => {
+          const tHeader = ['产品ID', '回款情况', '回款日期', '收费',
+            '负责人', '订单录入员', '发单日期', '物流状态',
+            '省', '市', '产品', '数量', '收件人',
+            '收件人号码', '收件人地址', '快递单号', '退货单号',
+            '换货单号']
+          const filterVal = ['id', 'payment_state', 'refund_time', 'payment',
+            'username', 'input_staff', 'delivery_time', 'delivery_state',
+            'province', 'city', 'name', 'buy_num', 'consignee',
+            'phone', 'address', 'courier_code', 'courier_code_return',
+            'courier_code_relapse']
+          const data = this.formatJson(filterVal, response.data)
+          excel.export_json_to_excel({
+            header: tHeader,
+            data,
+            filename: '订单数据-财务'
+          })
+        })
+      })
     }
   },
   computed: {
-    ...mapGetters(['name'])
+    ...mapGetters(['name', 'roles'])
   }
 }

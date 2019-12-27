@@ -88,3 +88,10 @@ export function get_publicist_list() {
     timeout: 5000
   })
 }
+export function query_name(data) {
+  return request({
+    url: '/user/query_name',
+    method: 'post',
+    data
+  })
+}

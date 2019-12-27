@@ -8,7 +8,8 @@ export function list_handle(items) {
     if (obj.apply_discount_state > 0) {
       obj.auxiliary_apply = obj.apply_discount_state !== 1
     }
-    obj.apply_discount_state = Boolean(obj.apply_discount_state)
+    obj.apply_discount_state_bool = obj.apply_discount_state
+    obj.apply_discount_state = obj.apply_discount_state === 2 ? obj.apply_discount_state : Boolean(obj.apply_discount_state)
     const delivery_state = obj.delivery_state
     if (typeof delivery_state === 'number') {
       obj.delivery_state = _global.DELIVERY_STATE[obj.delivery_state]
@@ -72,9 +73,9 @@ export function get_delivery_name(delivery) {
 
 // 以下是提交到服务器的数据格式化处理
 export function to_server_order(items) {
-  if (items['auxiliary_apply']) {
-    delete items['auxiliary_apply']
-  }
+  delete items['auxiliary_apply']
+  delete items['publicist_name']
+  delete items['apply_discount_state_bool']
   // 区域合并处理
   if (items.area) {
     items.province = items.area[0]
@@ -85,7 +86,6 @@ export function to_server_order(items) {
   }
   items.price = items.apply_discount_state ? items.price : get_product_price(items.buy_product)
   items.price = items.pay_method === '2' ? 0 : items.price
-  console.log(items.pay_method === '2', items.pay_method, 'ifczt')
   items.apply_discount_state = items.apply_discount_state ? 1 : 0
   items.buy_product = get_product(items.buy_product, 'id')
   items.delivery = get_delivery_id(items.delivery)
@@ -174,6 +174,38 @@ export function hanlder_region_list(list) {
 }
 
 export function randomColor() {
-  const colors = ['','success','info','warning','danger']
-  return colors[Math.floor(Math.random()*colors.length)]
+  const colors = ['', 'success', 'info', 'warning', 'danger']
+  return colors[Math.floor(Math.random() * colors.length)]
+}
+
+export function server_terr_data(list) {
+  list['start_time'] = list.time_slot[0]
+  list['eff_time'] = list.time_slot[1]
+  delete list.time_slot
+  list.city = list.city.join(',')
+  list.product = list.product.join(',')
+  return list
+}
+
+export function view_terr_data(list) {
+  list.province = CodeToText[list.province]
+  list.time_slot = list.time_slot[0] + '-' + list.time_slot[1]
+  let _city_arr = []
+  if (list.city.length <= 1 && list.city[0] === '') {
+    list.city = [{ name: '全市', id: 'all' }]
+  } else {
+    for (const cx of list.city) {
+      _city_arr.push({ name: CodeToText[cx], id: cx })
+    }
+  }
+  if (_city_arr.length === 0) {
+    _city_arr = [{ name: '全市', id: 'all' }]
+  }
+  list.city = _city_arr
+  const arr = []
+  for (const i of list.product) {
+    arr.push({ name: get_product_name(i), id: i })
+  }
+  list.product = arr
+  return list
 }

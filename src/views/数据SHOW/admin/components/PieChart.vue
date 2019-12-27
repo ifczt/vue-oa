@@ -39,11 +39,13 @@ export default {
     chartData: {
       deep: true,
       handler(val) {
+        console.log(val)
         this.chart.setOption({ series: [{ data: val }] })
       }
     },
     options: {
       handler(options) {
+        console.log(options)
         this.chart.setOption(this.options)
       },
       deep: true

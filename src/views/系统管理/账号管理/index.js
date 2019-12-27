@@ -93,7 +93,6 @@ export default {
   // html加载完成之前，执行
   created() {
     this.my_name = store.state.user.name
-    console.log(this.my_name)
     this.tableHeight = window.innerHeight - 250
     get_power_group().then(response => {
       this.power_group = response.data
@@ -163,7 +162,7 @@ export default {
           delete send_temp.check_password
           delete send_temp.u_id
           add_user(send_temp).then(response => {
-            this.list.unshift(response.data)
+            this.getList()
             this.dialogFormVisible = false
             this.$notify({
               title: '新建成功',

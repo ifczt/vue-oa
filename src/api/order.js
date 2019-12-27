@@ -4,7 +4,7 @@ export function fetchList(data) {
   return request({
     url: '/order/list',
     method: 'post',
-    timeout: 10000,
+    timeout: 100000,
     data
   })
 }
@@ -63,6 +63,20 @@ export function getPpg_id_info(data) {
 export function apply_discount_state_change(data) {
   return request({
     url: '/order/apply_discount_state_change',
+    method: 'post',
+    data
+  })
+}
+export function update_logistics(data) {
+  return request({
+    url: '/order/update_logistics',
+    method: 'post',
+    data
+  })
+}
+export function get_finance_list(data) {
+  return request({
+    url: '/order/down_finance',
     method: 'post',
     data
   })

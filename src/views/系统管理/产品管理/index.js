@@ -90,5 +90,13 @@ export default {
         })
       }
     }
+  },
+  beforeCreate() {
+    window.document.body.style.backgroundColor = '#F0F2F5'
+    next()
+  },
+  beforeDestroy() {
+    window.document.body.style.backgroundColor = ''
+    next()
   }
 }

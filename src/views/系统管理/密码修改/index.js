@@ -7,13 +7,8 @@ export default {
       btn_loading: false,
       btn_show: true,
       passwordOld: '',
-      passwordNew: '',
-      body_height: 600
+      passwordNew: ''
     }
-  },
-  // 渲染完成时
-  created() {
-    this.body_height = window.innerHeight - 50
   },
   // 调用函数
   methods: {
@@ -43,5 +38,13 @@ export default {
         this.btn_loading = false
       })
     }
+  },
+  beforeCreate() {
+    window.document.body.style.backgroundColor = '#F0F2F5'
+    next()
+  },
+  beforeDestroy() {
+    window.document.body.style.backgroundColor = ''
+    next()
   }
 }

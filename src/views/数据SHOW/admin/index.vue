@@ -1,10 +1,10 @@
 <template>
-  <div class="dashboard-editor-container" :style="{'height': body_height}">
+  <div class="dashboard-editor-container">
     <panel-group />
     <el-row style="background:#fff;padding:16px 16px 0;margin-bottom:32px;">
       <line-chart :chart-data="sale_chart_data" :options="sale_chart_data_options" />
     </el-row>
-    <el-row v-show="false" :gutter="32">
+    <el-row v-if="roles.includes('IFCZT')||roles.includes('FINANCE')||roles.includes('ADMIN')||roles.includes('FINANCE')||roles.includes('SUPER_ADMIN')" :gutter="32">
       <el-col :xs="24" :sm="24" :lg="24">
         <div class="chart-wrapper">
           <pie-chart :char-data="sale_person_data" :options="sale_person_data_options" />
@@ -15,38 +15,25 @@
 </template>
 
 <script>
-import GithubCorner from '@/components/GithubCorner'
-import PanelGroup from './components/PanelGroup'
-import LineChart from './components/LineChart'
-import RaddarChart from './components/RaddarChart'
+import PanelGroup from './components/四维图/PanelGroup'
+import LineChart from './components/曲线图/LineChart'
 import PieChart from './components/PieChart'
-import BarChart from './components/BarChart'
-import TransactionTable from './components/TransactionTable'
-import TodoList from './components/TodoList'
-import BoxCard from './components/BoxCard'
-
+import { getLineData, getLineOptions, getPieData } from '../../../api/dataShow'
+import { mapGetters } from 'vuex'
 const sale_person_data = []
-const sale_chart_data = {
-  t_y_p: [1, 2, 3, 4, 5],
-  n_y_p: [1, 2, 3, 0, 6]
+const sale_chart_data = {}
+const bb = function() {
+  console.log(this)
 }
-
 export default {
   name: 'DatashowAdmin',
   components: {
-    GithubCorner,
     PanelGroup,
     LineChart,
-    RaddarChart,
-    PieChart,
-    BarChart,
-    TransactionTable,
-    TodoList,
-    BoxCard
+    PieChart
   },
   data() {
     return {
-      body_height: '600px',
       sale_person_data_options: {
         tooltip: {
           trigger: 'item',
@@ -84,7 +71,7 @@ export default {
           }
         },
         xAxis: {
-          data: ['1', '1', '1', '1', '1', '1'],
+          data: [],
           boundaryGap: false,
           axisTick: {
             show: false
@@ -110,7 +97,7 @@ export default {
           }
         },
         legend: {
-          data: ['三年版', '一年版']
+          data: []
         },
         toolbox: {
           show: true,
@@ -124,6 +111,9 @@ export default {
             },
             my_next_month: {
               show: true,
+              onclick: function() {
+                bb()
+              },
               icon: 'path://M294.4 908.8 684.8 512 294.4 115.2c-25.6-25.6-25.6-70.4 0-96 25.6-25.6 70.4-25.6 96 0L832 460.8c12.8 12.8 19.2 32 19.2 51.2S844.8 544 832 563.2l-441.6 441.6c-25.6 25.6-70.4 25.6-96 0C262.4 979.2 262.4 934.4 294.4 908.8z'
             }
           },
@@ -137,35 +127,55 @@ export default {
             }
           }
         },
-        series: [
-          {
-            name: '三年版',
-            smooth: true,
-            type: 'line',
-            data: sale_chart_data.t_y_p,
-            animationDuration: 2800,
-            animationEasing: 'cubicInOut'
-          },
-          {
-            name: '一年版',
-            smooth: true,
-            type: 'line',
-            data: sale_chart_data.n_y_p,
-            animationDuration: 2800,
-            animationEasing: 'quadraticOut'
-          }]
+        series: []
       }
     }
   },
   created() {
-    this.body_height = window.innerHeight - 50 + 'px'
+    this.setLineChartOptions()
   },
   mounted() {
   },
+  beforeCreate() {
+    window.document.body.style.backgroundColor = '#F0F2F5'
+    next()
+  },
+  beforeDestroy() {
+    window.document.body.style.backgroundColor = ''
+    next()
+  },
   methods: {
-    handleSetLineChartData() {
-
+    setPieData() {
+      getPieData().then(response => {
+        const data = response.data
+        this.sale_person_data_options.legend.data = data.legend
+        this.sale_person_data_options.series[0].data = data.data
+      })
+    },
+    setLineChartOptions(month) {
+      getLineOptions().then(response => {
+        const data = response.data
+        this.sale_chart_data_options.title.text = data.title
+        this.sale_chart_data_options.xAxis.data = data.xAxis
+        this.sale_chart_data_options.legend.data = data.legend
+        this.setLineChartData()
+      })
+    },
+    setLineChartData(month) {
+      getLineData().then(response => {
+        this.sale_chart_data_options.series = response.data
+        this.setPieData()
+      })
+    },
+    next_month() {
+      console.log(123)
+    },
+    prev_month() {
+      console.log(123)
     }
+  },
+  computed: {
+    ...mapGetters(['name', 'roles'])
   }
 }
 </script>
@@ -173,8 +183,8 @@ export default {
 <style lang="scss" scoped>
   .dashboard-editor-container {
     padding: 32px;
-    background-color: rgb(240, 242, 245);
     position: relative;
+
     .github-corner {
       position: absolute;
       top: 0px;

@@ -59,7 +59,7 @@
       <el-table-column align="center" label="操作" min-width="190">
         <template slot-scope="scope">
           <el-tooltip class="item" effect="dark" content="修改密码及权限" placement="top-start">
-            <el-button icon="el-icon-edit" type="primary" circle @click="editUser(scope.row)" />
+            <el-button v-if="scope.row.username!==my_name" icon="el-icon-edit" type="primary" circle @click="editUser(scope.row)" />
           </el-tooltip>
           <el-tooltip
             class="item"
@@ -77,7 +77,7 @@
             />
           </el-tooltip>
           <el-popconfirm
-            title="你现在的这个操作很危险，请确认!删除后所有关联该用户的所有数据都将消失,如非必要请选择禁用，孩子。"
+            title="你现在的这个操作很危险，请确认!删除后所有关联该用户的所有数据都将消失,如非必要请选择禁用。"
             style="padding-left: 10px"
             @onConfirm="m_del_user(scope.$index,scope.row.id)"
           >

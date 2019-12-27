@@ -33,7 +33,7 @@
               <span><el-tag>{{ scope.row.address }}</el-tag></span>
             </el-form-item>
             <el-form-item label="申请折扣状态:">
-              <span><el-tag>{{ scope.row.apply_discount_state?"申请中":"未申请" }}</el-tag></span>
+              <span><el-tag>{{ scope.row.apply_discount_state===2?'已同意':scope.row.apply_discount_state?"申请中":"未申请" }}</el-tag></span>
             </el-form-item>
             <el-form-item label="订单录入员:">
               <span><el-tag type="info">{{ scope.row.input_staff }}</el-tag></span>
@@ -67,11 +67,11 @@
       <el-table-column width="100px" align="center" label="物流状态">
         <template slot-scope="scope">
           <span><el-tag
-            :type="scope.row.delivery_state==='未发货'?'info':scope.row.delivery_state==='签收'?'success':'danger'"
+            :type="scope.row.delivery_state==='未发货'?'info':scope.row.delivery_state==='已签收'?'success':'danger'"
           >{{ scope.row.delivery_state }}</el-tag></span>
         </template>
       </el-table-column>
-      <el-table-column class-name="status-col" label="售价" width="100">
+      <el-table-column class-name="status-col" label="代收货款" width="100">
         <template slot-scope="scope">
           <span>{{ scope.row.price }}</span>
         </template>
@@ -116,7 +116,7 @@
       </el-table-column>
     </el-table>
 
-    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
+    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" top="5vh">
       <el-form
         ref="dataForm"
         :rules="rules"
@@ -141,6 +141,7 @@
               :price="item.price"
             />
           </el-select>
+          <el-input-number v-model="temp.buy_num" style="width: 100px" controls-position="right" :min="1" :max="10" />
         </el-form-item>
         <el-form-item label="派单时间" prop="delivery_time">
           <el-date-picker
@@ -199,11 +200,19 @@
             />
           </el-select>
         </el-form-item>
+        <el-form-item label="备注">
+          <el-input
+            v-model="temp.remarks"
+            type="textarea"
+            :rows="2"
+            placeholder="请输入内容"
+          />
+        </el-form-item>
         <el-form-item v-show="temp.pay_method==='1'" label="申请折扣">
           <el-switch v-model="temp.apply_discount_state" />
         </el-form-item>
         <el-form-item v-show="temp.apply_discount_state" label="价格调整">
-          <el-input-number v-model="temp.price" :min="0" :max="1290" />
+          <el-input-number v-model="temp.price" :min="0" :max="5000" style="line-height: 34px" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">

@@ -25,7 +25,7 @@
         </div>
         <div class="card-panel-description">
           <div class="card-panel-text">
-            本年度销售套数
+            本年度已签收套数
           </div>
           <count-to :start-val="start_sales_year" :end-val="sales_year" :duration="3000" class="card-panel-num" />
         </div>
@@ -51,7 +51,7 @@
         </div>
         <div class="card-panel-description">
           <div class="card-panel-text">
-            今日问题件
+            问题件
           </div>
           <count-to :start-val="start_problem_info" :end-val="problem_info" :duration="3600" class="card-panel-num" />
         </div>
@@ -60,30 +60,7 @@
   </el-row>
 </template>
 
-<script>
-import CountTo from 'vue-count-to'
-
-export default {
-  components: {
-    CountTo
-  },
-  data() {
-    return {
-      sales_volume: 0,
-      start_sales_volume: 0,
-      problem_info: 0,
-      start_problem_info: 0,
-      sales_today: 0,
-      start_sales_today: 0,
-      sales_year: 0,
-      start_sales_year: 0
-    }
-  },
-  methods: {
-
-  }
-}
-</script>
+<script src="./index.js"/>
 
 <style lang="scss" scoped>
   .panel-group {
