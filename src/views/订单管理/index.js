@@ -58,7 +58,12 @@ export default {
       china_options: regionDataPlus,
       // 快速选择派单日期
       picker_date: {
-        shortcuts: [today, tomorrow, after_tomorrow]
+        disabledDate(time) {
+          // 在科学计数法中，为了使公式简便，可以用带“E”的格式表示。例如1.03乘10的8次方，可简写为“1.03e8”的形式
+          // 一天是24*60*60*1000 = 86400000 = 8.64e7
+          return time.getTime() < (Date.now() - 8.64e7) + 2.88e7
+        },
+        shortcuts: [tomorrow, after_tomorrow]
       },
       // 快速选择时间段
       picker_time_slot: {
@@ -108,7 +113,7 @@ export default {
         // 收件人-谁是
         consignee: '1',
         // 派单时间
-        delivery_time: parseTime(new Date(), '{y}-{m}-{d}'),
+        delivery_time: new Date().getHours() <= 11 ? parseTime(new Date(), '{y}-{m}-{d}') : parseTime(new Date().setTime(new Date().getTime() + 3600 * 1000 * 24), '{y}-{m}-{d}'),
         // 宣传编号
         ppg_id: null,
         // 学校名称
@@ -293,7 +298,7 @@ export default {
         publicist: '',
         input_staff: this.name,
         delivery_state: '',
-        delivery_time: parseTime(new Date(), '{y}-{m}-{d}'),
+        delivery_time: new Date().getHours() <= 11 ? parseTime(new Date(), '{y}-{m}-{d}') : parseTime(new Date().setTime(new Date().getTime() + 3600 * 1000 * 24), '{y}-{m}-{d}'),
         ppg_id: '',
         school: '',
         school_code: '',
@@ -342,6 +347,7 @@ export default {
     // 更新数据视图弹出
     handleUpdate(row) {
       this.temp = Object.assign({}, row) // copy obj
+      this.temp.delivery_time = new Date(this.temp.delivery_time)
       this.dialogStatus = 'update'
       this.dialogFormVisible = true
       this.$nextTick(() => {

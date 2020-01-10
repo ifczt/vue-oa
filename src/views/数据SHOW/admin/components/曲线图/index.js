@@ -16,7 +16,7 @@ export default {
     },
     height: {
       type: String,
-      default: '350px'
+      default: '420px'
     },
     autoResize: {
       type: Boolean,
@@ -36,15 +36,15 @@ export default {
     }
   },
   watch: {
-    // chartData: {
-    //   deep: true,
-    //   handler(val) {
-    //     this.chart.setOption({series:val})
-    //   }
-    // },
+    chartData: {
+      deep: true,
+      handler(val) {
+        this.chart.setOption({ series: val }, true)
+      }
+    },
     options: {
       handler(options) {
-        this.chart.setOption(this.options)
+        this.chart.setOption(this.options, true)
       },
       deep: true
     }

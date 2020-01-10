@@ -13,7 +13,7 @@
         </el-card>
       </el-col>
     </el-row>
-    <el-dialog :title="title" width="95%" :visible.sync="dialogFormVisible" top="10vh">
+    <el-dialog :title="title" width="95%" :visible.sync="dialogFormVisible" top="10vh" :close-on-click-modal="false">
       <el-button type="primary" @click="embedFormVisible=true">新增签约</el-button>
       <div style="text-align: center;width: 100%">
         <el-table
@@ -84,7 +84,7 @@
         style="padding: 0;margin-top: 15px"
         @pagination="get_region_list"
       />
-      <el-dialog width="720px" :title="embed_title" :visible.sync="embedFormVisible" append-to-body>
+      <el-dialog width="720px" :title="embed_title" :visible.sync="embedFormVisible" append-to-body :close-on-click-modal="false">
         <el-row style="padding-left: 35px;margin-top: 10px">
           <el-select
             v-model="temp.province"

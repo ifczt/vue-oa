@@ -36,9 +36,18 @@ export function inputOrder(data) {
   })
 }
 
-export function getProductList() {
+export function getProductList(data) {
   return request({
     url: '/product_list',
+    method: 'post',
+    timeout: 5000,
+    data
+  })
+}
+
+export function getProductGroupList() {
+  return request({
+    url: '/product_group_list',
     method: 'get',
     timeout: 5000
   })

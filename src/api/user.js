@@ -7,6 +7,7 @@ export function login(data) {
     timeout: 0,
     data
   })
+  console.log(process.env.BASE_API, 'ifcztweb')
 }
 
 export function getInfo(token) {

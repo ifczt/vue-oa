@@ -31,7 +31,7 @@
             </div>
           </div>
         </el-card>
-        <el-card v-else style="height: 230px;text-align: center" shadow="hover">
+        <el-card v-else style="height: 230px;width:220px;text-align: center" shadow="hover">
           <svg-icon
             icon-class="添加供应"
             style="width: 10rem;height: 10rem;padding-top: 2.5rem;cursor:pointer"

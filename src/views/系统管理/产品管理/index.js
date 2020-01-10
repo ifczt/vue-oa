@@ -1,11 +1,15 @@
 import { to_asarray } from '@/utils/server_data'
-import { getProductList } from '@/api/order'
+import { getProductGroupList, getProductList } from '@/api/order'
 import { active_product, creat_product, del_product, edit_product } from '@/api/product'
+import fa from 'element-ui/src/locale/lang/fa'
 
 export default {
   name: 'manage_product',
   data() {
     return {
+      table_loading: true,
+      product_group_name: '',
+      dialog_product: false,
       pick_item: null,
       title: '新增产品',
       product_name: '',
@@ -13,6 +17,7 @@ export default {
       dialogFormVisible: false,
       btn_loading: false,
       list: [],
+      table_list: [],
       copy_list: [],
       body_height: 600
     }
@@ -30,9 +35,9 @@ export default {
   // 渲染完成时
   created() {
     this.body_height = window.innerHeight - 50
-    getProductList().then(response => {
+    getProductGroupList().then(response => {
       this.list = response.data
-      this.copy_list = to_asarray(this.list, 5)
+      this.copy_list = to_asarray(this.list, 4)
     })
   },
   // 调用函数
@@ -51,7 +56,6 @@ export default {
             this.list.splice(i, 1)
           }
         }
-        this.copy_list = to_asarray(this.list, 5)
       })
     },
     active(item, on) {
@@ -63,7 +67,15 @@ export default {
       this.dialogFormVisible = true
       this.title = '新增产品'
     },
-    // 生成快递公司
+    show_product(item) {
+      this.product_group_name = item.name
+      this.dialog_product = true
+      this.table_loading = true
+      getProductList({ ids: item.sub_product }).then(response => {
+        this.table_list = response.data
+        this.table_loading = false
+      })
+    },
     creat_express() {
       if (this.product_name.length < 2) {
         this.$message('请认真输入，瓜皮。')
@@ -79,7 +91,7 @@ export default {
             id: response.data.id,
             active: response.data.active
           })
-          this.copy_list = to_asarray(this.list, 5)
+          this.copy_list = to_asarray(this.list, 4)
         })
       } else {
         edit_product({ price: this.price, id: this.pick_item.id, name: this.product_name }).then(() => {
@@ -93,10 +105,8 @@ export default {
   },
   beforeCreate() {
     window.document.body.style.backgroundColor = '#F0F2F5'
-    next()
   },
   beforeDestroy() {
     window.document.body.style.backgroundColor = ''
-    next()
   }
 }

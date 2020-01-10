@@ -189,6 +189,7 @@
             <el-popover trigger="hover" placement="top-start">
               <p>区域: {{ scope.row.region }}</p>
               <p>地址: {{ scope.row.school_address }}</p>
+              <p>联系方式:{{ scope.row.contact_info }}</p>
               <div slot="reference" class="name-wrapper">
                 {{ scope.row.school_name }}
               </div>

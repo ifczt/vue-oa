@@ -2,9 +2,15 @@
   <div class="dashboard-editor-container">
     <panel-group />
     <el-row style="background:#fff;padding:16px 16px 0;margin-bottom:32px;">
+      <div style="text-align: center;">
+        <el-button v-for="item of product_group" @click="show_data_show(item.sub_product)">{{ item.name }}</el-button>
+      </div>
       <line-chart :chart-data="sale_chart_data" :options="sale_chart_data_options" />
     </el-row>
-    <el-row v-if="roles.includes('IFCZT')||roles.includes('FINANCE')||roles.includes('ADMIN')||roles.includes('FINANCE')||roles.includes('SUPER_ADMIN')" :gutter="32">
+    <el-row
+      v-if="roles.includes('IFCZT')||roles.includes('FINANCE')||roles.includes('ADMIN')||roles.includes('FINANCE')||roles.includes('SUPER_ADMIN')"
+      :gutter="32"
+    >
       <el-col :xs="24" :sm="24" :lg="24">
         <div class="chart-wrapper">
           <pie-chart :char-data="sale_person_data" :options="sale_person_data_options" />
@@ -20,11 +26,11 @@ import LineChart from './components/曲线图/LineChart'
 import PieChart from './components/PieChart'
 import { getLineData, getLineOptions, getPieData } from '../../../api/dataShow'
 import { mapGetters } from 'vuex'
+import { getProductGroupList } from '../../../api/order'
+
 const sale_person_data = []
 const sale_chart_data = {}
-const bb = function() {
-  console.log(this)
-}
+let vm = null
 export default {
   name: 'DatashowAdmin',
   components: {
@@ -34,6 +40,9 @@ export default {
   },
   data() {
     return {
+      group_change: null,
+      product_group: [],
+      month: new Date().getMonth() + 1,
       sale_person_data_options: {
         tooltip: {
           trigger: 'item',
@@ -81,7 +90,7 @@ export default {
           left: 10,
           right: 10,
           bottom: 20,
-          top: 30,
+          top: 70,
           containLabel: true
         },
         tooltip: {
@@ -97,6 +106,7 @@ export default {
           }
         },
         legend: {
+          padding: 30,
           data: []
         },
         toolbox: {
@@ -107,12 +117,15 @@ export default {
             my_prev_month: {
               symbol: 'circle',
               show: true,
+              onclick: function() {
+                vm.setLineChart(-1)
+              },
               icon: 'path://M704 908.8 307.2 512 704 115.2c25.6-25.6 25.6-70.4 0-96-25.6-25.6-70.4-25.6-96 0L166.4 460.8C147.2 480 140.8 492.8 140.8 512s6.4 32 19.2 51.2l441.6 441.6c25.6 25.6 70.4 25.6 96 0C729.6 979.2 729.6 934.4 704 908.8z'
             },
             my_next_month: {
               show: true,
               onclick: function() {
-                bb()
+                vm.setLineChart(1)
               },
               icon: 'path://M294.4 908.8 684.8 512 294.4 115.2c-25.6-25.6-25.6-70.4 0-96 25.6-25.6 70.4-25.6 96 0L832 460.8c12.8 12.8 19.2 32 19.2 51.2S844.8 544 832 563.2l-441.6 441.6c-25.6 25.6-70.4 25.6-96 0C262.4 979.2 262.4 934.4 294.4 908.8z'
             }
@@ -132,19 +145,35 @@ export default {
     }
   },
   created() {
-    this.setLineChartOptions()
+    vm = this
+    getProductGroupList().then(response => {
+      this.product_group = response.data
+      this.show_data_show(this.product_group[0].sub_product)
+    })
   },
   mounted() {
   },
   beforeCreate() {
     window.document.body.style.backgroundColor = '#F0F2F5'
-    next()
   },
   beforeDestroy() {
     window.document.body.style.backgroundColor = ''
-    next()
   },
   methods: {
+    show_data_show(ids) {
+      this.group_change = ids.split(',')
+      this.setLineChartOptions()
+    },
+    setLineChart(type) {
+      this.month += type
+      if (this.month > 12) {
+        this.month = 1
+      }
+      if (this.month < 1) {
+        this.month = 12
+      }
+      this.setLineChartOptions(this.month)
+    },
     setPieData() {
       getPieData().then(response => {
         const data = response.data
@@ -153,25 +182,22 @@ export default {
       })
     },
     setLineChartOptions(month) {
-      getLineOptions().then(response => {
+      getLineOptions({ ids: this.group_change, month: month }).then(response => {
         const data = response.data
         this.sale_chart_data_options.title.text = data.title
         this.sale_chart_data_options.xAxis.data = data.xAxis
+        this.sale_chart_data_options.legend.data = []
         this.sale_chart_data_options.legend.data = data.legend
-        this.setLineChartData()
+        this.setLineChartData(month)
       })
     },
     setLineChartData(month) {
-      getLineData().then(response => {
-        this.sale_chart_data_options.series = response.data
+      getLineData({ ids: this.group_change, month: month }).then(response => {
+        this.sale_chart_data_options.series = []
+        this.$set(this.sale_chart_data_options, 'series', response.data)
+        // this.sale_chart_data_options.series = response.data;
         this.setPieData()
       })
-    },
-    next_month() {
-      console.log(123)
-    },
-    prev_month() {
-      console.log(123)
     }
   },
   computed: {

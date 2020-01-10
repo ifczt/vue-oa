@@ -24,8 +24,11 @@
           <i class="el-icon-caret-bottom" />
         </div>
         <el-dropdown-menu slot="dropdown">
+          <router-link to="">
+            <el-dropdown-item disabled>{{ name }}</el-dropdown-item>
+          </router-link>
           <router-link to="/set_up/edit_password">
-            <el-dropdown-item>修改密码</el-dropdown-item>
+            <el-dropdown-item divided>修改密码</el-dropdown-item>
           </router-link>
           <el-dropdown-item divided>
             <span style="display:block;" @click="logout">切换账号</span>
@@ -58,7 +61,8 @@ export default {
     ...mapGetters([
       'sidebar',
       'avatar',
-      'device'
+      'device',
+      'name'
     ])
   },
   methods: {

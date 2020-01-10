@@ -12,8 +12,6 @@ export default {
   },
   // 调用函数
   methods: {
-    // 标识类型
-    passwordOld: false, passwordNew: false,
     // 提交编辑密码
     change_edit() {
       if (!this.passwordOld || !this.passwordNew) {
@@ -41,10 +39,8 @@ export default {
   },
   beforeCreate() {
     window.document.body.style.backgroundColor = '#F0F2F5'
-    next()
   },
   beforeDestroy() {
     window.document.body.style.backgroundColor = ''
-    next()
   }
 }
