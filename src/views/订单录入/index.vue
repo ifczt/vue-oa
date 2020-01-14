@@ -126,21 +126,30 @@
         style="width: 430px; margin-left:50px;"
       >
         <el-form-item label="购买产品" prop="buy_product">
-          <el-select
+          <el-cascader
             v-model="temp.buy_product"
-            value-key="id"
-            class="filter-item"
-            placeholder="点击选择"
+            :options="product_group_options"
+            :show-all-levels="false"
+            :props="{emitPath:false }"
+            clearable
+            style="width: 220px;"
             @change="changeProduct"
-          >
-            <el-option
-              v-for="item in product_name_options"
-              :id="item.id"
-              :label="item.name"
-              :value="item"
-              :price="item.price"
-            />
-          </el-select>
+          />
+          <!--          <el-select-->
+          <!--            v-model="temp.buy_product"-->
+          <!--            value-key="id"-->
+          <!--            class="filter-item"-->
+          <!--            placeholder="点击选择"-->
+          <!--            @change="changeProduct"-->
+          <!--          >-->
+          <!--            <el-option-->
+          <!--              v-for="item in product_name_options"-->
+          <!--              :id="item.id"-->
+          <!--              :label="item.name"-->
+          <!--              :value="item"-->
+          <!--              :price="item.price"-->
+          <!--            />-->
+          <!--          </el-select>-->
           <el-input-number v-model="temp.buy_num" style="width: 100px" controls-position="right" :min="1" :max="10" />
         </el-form-item>
         <el-form-item label="派单时间" prop="delivery_time">

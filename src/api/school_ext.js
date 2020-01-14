@@ -69,3 +69,37 @@ export function add_school_server(data) {
     data
   })
 }
+
+export function get_school_log(data) {
+  return request({
+    url: '/get_school_log',
+    method: 'post',
+    timeout: 0,
+    data
+  })
+}
+
+export function add_school_log(data) {
+  return request({
+    url: '/add_school_log',
+    method: 'post',
+    timeout: 0,
+    data
+  })
+}
+export function del_school_log(data) {
+  return request({
+    url: '/del_school_log',
+    method: 'post',
+    timeout: 0,
+    data
+  })
+}
+export function update_school_log(data) {
+  return request({
+    url: '/update_school_log',
+    method: 'post',
+    timeout: 0,
+    data
+  })
+}

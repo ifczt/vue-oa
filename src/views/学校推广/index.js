@@ -2,24 +2,41 @@ import tabPane from './components/TabPane'
 import { CodeToText, provinceAndCityData, regionData } from 'element-china-area-data'
 import Pagination from '@/components/Pagination'
 import {
-  add_school_server,
+  add_school_log,
+  add_school_server, del_school_log,
   edit_school_server,
-  get_province, get_region_options, get_region_school, input_ext, query_school
+  get_province, get_region_options, get_region_school, get_school_log, input_ext, query_school, update_school_log
 } from '@/api/school_ext'
 import fa from 'element-ui/src/locale/lang/fa'
 import { to_server_order, to_server_region_school } from '@/utils/server_data'
 import { checkPhone } from '@/utils/Global'
+import { parseTime } from '@/utils'
 
 export default {
   name: 'school_ext',
   components: { tabPane, Pagination },
   data() {
     return {
+      show_log_index: 0,
+      log_is_edit: false,
+      log_btn_loading: false,
+      log_form: {
+        title: '',
+        content: '',
+        school_code: ''
+      },
+      school_log_add: false,
+      school_log_loading: true,
+      school_log_title: '日志查看',
+      school_log_list: [],
+      school_log_visible: false,
       cache_res: '',
       rules: {
         school_name: [{ required: true, message: '请输入学校名称' }],
         area: [{ required: true, message: '请选择学校区域', trigger: 'change' }],
-        quality: [{ required: true, message: '请选择学校质量', trigger: 'change' }]
+        quality: [{ required: true, message: '请选择学校质量', trigger: 'change' }],
+        title: [{ required: true, message: '请输入日志标题' }],
+        content: [{ required: true, message: '请输入日志内容' }]
       },
       edit_add: '编辑学校信息',
       china_options: regionData,
@@ -75,6 +92,16 @@ export default {
     }
   },
   watch: {
+    school_log_add(val) {
+      if (!val) {
+        this.log_is_edit = false
+        this.log_form.title = ''
+        this.log_form.content = ''
+      }
+    },
+    school_log_visible(val) {
+      this.school_log_loading = val
+    },
     // 选择下拉框后的提示信息 显示开关为FALSE时触发初始化
     school_tip_show(val) {
       if (!val) {
@@ -114,6 +141,66 @@ export default {
     this.get_region_list()
   },
   methods: {
+    show_log(index, id) {
+      this.log_btn_loading = true
+      this.log_is_edit = true
+      this.show_log_index = index
+      get_school_log({ school_code: this.log_form.school_code, id: id }).then(response => {
+        this.log_form.title = response.data.title
+        this.log_form.content = response.data.content
+        this.log_form.id = response.data.id
+        this.school_log_add = true
+        this.log_btn_loading = false
+      })
+    },
+    submit_del_log(index, id) {
+      del_school_log({ id: id }).then(response => {
+        this.$message({
+          message: '成功删除',
+          type: 'success'
+        })
+        this.school_log_list.splice(index, 1)
+      })
+    },
+    submit_add_log(formName) {
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
+          if (this.log_is_edit) {
+            update_school_log(this.log_form).then(response => {
+              this.school_log_add = false
+              this.school_log_list.splice(this.show_log_index, 1, response.data)
+              this.$message({
+                message: '修改成功',
+                type: 'success'
+              })
+            })
+          } else {
+            add_school_log(this.log_form).then(response => {
+              this.$message({
+                message: '写入成功',
+                type: 'success'
+              })
+              this.school_log_add = false
+              const _item = {
+                title: this.log_form.title,
+                id: response.data.id,
+                input_time: response.data.input_time
+              }
+              this.school_log_list.unshift(_item)
+            })
+          }
+        }
+      })
+    },
+    see_school_log(item) {
+      this.school_log_visible = true
+      this.school_log_title = item.school_name + '-拜访日志查看'
+      get_school_log({ school_code: item.school_code }).then(response => {
+        this.school_log_list = response.data
+        this.log_form.school_code = item.school_code
+        this.school_log_loading = false
+      })
+    },
     tabsClick(tab) {
       if (this.cache_ref) {
         this.$refs[this.cache_ref][0].getList()
@@ -312,10 +399,8 @@ export default {
   },
   beforeCreate() {
     window.document.body.style.backgroundColor = '#F0F2F5'
-    next()
   },
   beforeDestroy() {
     window.document.body.style.backgroundColor = ''
-    next()
   }
 }

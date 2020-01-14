@@ -1,7 +1,16 @@
 import { CodeToText, regionDataPlus } from 'element-china-area-data'
 import {
-  fetchList, inputOrder, getProductList, getExpressList,
-  getPpg_id_info, del_list, update_order, apply_discount_state_change, update_logistics, get_finance_list
+  fetchList,
+  inputOrder,
+  getProductList,
+  getExpressList,
+  getPpg_id_info,
+  del_list,
+  update_order,
+  apply_discount_state_change,
+  update_logistics,
+  get_finance_list,
+  getProductGroupList
 } from '@/api/order'
 import Pagination from '@/components/Pagination'
 import { parseTime } from '@/utils'
@@ -142,6 +151,8 @@ export default {
       },
       // 产品列表
       product_name_options: [],
+      product_group_options: [],
+      product_group_options_b: [],
       // 派送方式
       delivery_mode_options: [],
       // 隐藏表单
@@ -171,6 +182,33 @@ export default {
     Loading.service(loading_options)
   },
   methods: {
+    get_group_options_fun() {
+      getProductGroupList().then(response => {
+        this.product_group_options = []
+        this.product_group_options_b = []
+        for (const item of response.data) {
+          const children = []
+          const children_b = []
+          const sub_product = item.sub_product.split(',')
+          for (const i of this.product_name_options) {
+            if (sub_product.includes(i.id.toString())) {
+              children.push({
+                label: i.name,
+                value: i,
+                price: i.price,
+                id: i.id
+              })
+              children_b.push({
+                label: i.name,
+                value: i.id
+              })
+            }
+          }
+          this.product_group_options.push({ label: item.name, value: item.id, children: children })
+          this.product_group_options_b.push({ label: item.name, value: item.id, children: children_b })
+        }
+      })
+    },
     query_name_select(item) {
       this.listQuery.input_staff_id = item.id
     },
@@ -286,6 +324,7 @@ export default {
         this.list = list_handle(response.data.items)
         this.total = response.data.total
         this.listLoading = false
+        this.get_group_options_fun()
       })
     },
     // 重置表单
@@ -321,7 +360,6 @@ export default {
     area_select(value) {
       let area_value = ''
       this.temp.area = value
-      console.log(value)
       for (const i in value) {
         area_value += CodeToText[value[i]]
       }

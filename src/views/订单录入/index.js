@@ -1,7 +1,7 @@
 import { regionData, CodeToText } from 'element-china-area-data'
 import {
   fetchList, inputOrder, getProductList, getExpressList,
-  getPpg_id_info, del_list, update_order
+  getPpg_id_info, del_list, update_order, getProductGroupList
 } from '@/api/order'
 import Pagination from '@/components/Pagination'
 import { parseTime } from '@/utils'
@@ -92,6 +92,7 @@ export default {
       },
       // 产品列表
       product_name_options: [],
+      product_group_options: [],
       // 派送方式
       delivery_mode_options: [],
       // 隐藏表单
@@ -121,6 +122,26 @@ export default {
     Loading.service(loading_options)
   },
   methods: {
+    get_group_options_fun() {
+      getProductGroupList().then(response => {
+        this.product_group_options = []
+        for (const item of response.data) {
+          const children = []
+          const sub_product = item.sub_product.split(',')
+          for (const i of this.product_name_options) {
+            if (sub_product.includes(i.id.toString())) {
+              children.push({
+                label: i.name,
+                value: i,
+                price: i.price,
+                id: i.id
+              })
+            }
+          }
+          this.product_group_options.push({ label: item.name, value: item.id, children: children })
+        }
+      })
+    },
     expandChange(row, expandedRows) {
       const that = this
       // 只展开一行
@@ -143,6 +164,7 @@ export default {
     getList() {
       this.listLoading = true
       fetchList(this.listQuery).then(response => {
+        this.get_group_options_fun()
         this.list = list_handle(response.data.items)
         this.total = response.data.total
         this.listLoading = false
@@ -255,6 +277,7 @@ export default {
       })
     },
     changeProduct(item) {
+      console.log(item)
       this.temp.price = item.price
     },
     // 获取产品列表 加载完成就获取快递列表

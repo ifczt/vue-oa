@@ -73,21 +73,30 @@
           </el-select>
         </el-row>
         <el-row>
-          <el-select
+          <el-cascader
             v-model="listQuery.buy_product"
-            placeholder="产品名称"
+            :options="product_group_options_b"
+            :show-all-levels="false"
+            :props="{ multiple: true,emitPath:false }"
             clearable
-            class="filter-item"
-            style="width: 250px;margin-top: 10px;"
-            multiple
             collapse-tags
-          >
-            <el-option
-              v-for="item in product_name_options"
-              :label="item.name"
-              :value="item.id"
-            />
-          </el-select>
+            style="width: 265px;margin-top: 10px;"
+          />
+          <!--          <el-select-->
+          <!--            v-model="listQuery.buy_product"-->
+          <!--            placeholder="产品名称"-->
+          <!--            clearable-->
+          <!--            class="filter-item"-->
+          <!--            style="width: 250px;margin-top: 10px;"-->
+          <!--            multiple-->
+          <!--            collapse-tags-->
+          <!--          >-->
+          <!--            <el-option-->
+          <!--              v-for="item in product_name_options"-->
+          <!--              :label="item.name"-->
+          <!--              :value="item.id"-->
+          <!--            />-->
+          <!--          </el-select>-->
           <el-autocomplete
             v-model="listQuery.input_staff"
             :fetch-suggestions="queryName"
@@ -317,21 +326,30 @@
         style="width: 430px; margin-left:50px;"
       >
         <el-form-item label="购买产品" prop="buy_product">
-          <el-select
+          <el-cascader
             v-model="temp.buy_product"
-            value-key="id"
-            class="filter-item"
-            placeholder="点击选择"
+            :options="product_group_options"
+            :show-all-levels="false"
+            :props="{emitPath:false }"
+            clearable
+            style="width: 220px;"
             @change="changeProduct"
-          >
-            <el-option
-              v-for="item in product_name_options"
-              :id="item.id"
-              :label="item.name"
-              :value="item"
-              :price="item.price"
-            />
-          </el-select>
+          />
+          <!--          <el-select-->
+          <!--            v-model="temp.buy_product"-->
+          <!--            value-key="id"-->
+          <!--            class="filter-item"-->
+          <!--            placeholder="点击选择"-->
+          <!--            @change="changeProduct"-->
+          <!--          >-->
+          <!--            <el-option-->
+          <!--              v-for="item in product_name_options"-->
+          <!--              :id="item.id"-->
+          <!--              :label="item.name"-->
+          <!--              :value="item"-->
+          <!--              :price="item.price"-->
+          <!--            />-->
+          <!--          </el-select>-->
         </el-form-item>
         <el-form-item label="派单时间" prop="delivery_time">
           <el-date-picker

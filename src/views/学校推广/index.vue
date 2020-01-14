@@ -201,6 +201,11 @@
             {{ row.quality }}
           </template>
         </el-table-column>
+        <el-table-column label="操作" width="130">
+          <template slot-scope="{row}">
+            <el-button size="mini" type="success" icon="el-icon-share" @click="see_school_log(row)">拜访日志</el-button>
+          </template>
+        </el-table-column>
       </el-table>
       <pagination
         v-show="total>0"
@@ -210,7 +215,60 @@
         style="padding: 0;margin-top: 15px"
         @pagination="get_school_list"
       />
+      <el-drawer
+        :title="school_log_title"
+        :append-to-body="true"
+        size="50%"
+        :visible.sync="school_log_visible"
+        align="center"
+      >
+        <el-button type="primary" @click="school_log_add=true">添加日志<i class="el-icon-upload el-icon--right" /></el-button>
+        <el-table
+          v-loading="school_log_loading"
+          :data="school_log_list"
+          stripe
+          fit
+          highlight-current-row
+          style="width: 90%"
+          :height="table_height"
+        >
+          <el-table-column label="标题" min-width="110">
+            <template slot-scope="{row}">
+              {{ row.title }}
+            </template>
+          </el-table-column>
+          <el-table-column label="记录时间" min-width="110">
+            <template slot-scope="{row}">
+              {{ row.input_time | parseTime('{y}-{m}-{d}') }}
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" width="140">
+            <template slot-scope="scope">
+              <el-button size="mini" type="primary" icon="el-icon-view" :loading="log_btn_loading" @click="show_log(scope.$index,scope.row.id)" />
+              <el-button size="mini" type="primary" icon="el-icon-delete" @click="submit_del_log(scope.$index,scope.row.id)" />
+            </template>
+          </el-table-column>
+        </el-table>
+      </el-drawer>
     </el-drawer>
+    <el-dialog
+      title="日志添加"
+      :visible.sync="school_log_add"
+      width="40%"
+    >
+      <el-form ref="log_form" :rules="rules" :model="log_form" label-width="80px">
+        <el-form-item label="日志标题" prop="title">
+          <el-input v-model="log_form.title" />
+        </el-form-item>
+        <el-form-item label="日志内容" prop="content">
+          <el-input v-model="log_form.content" type="textarea" />
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="school_log_add = false">取 消</el-button>
+        <el-button type="primary" @click="submit_add_log('log_form')">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
